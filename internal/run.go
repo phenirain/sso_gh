@@ -48,7 +48,13 @@ func startServers(ctx context.Context, g *errgroup.Group, db *sqlx.DB, cfg *conf
 	jwtLib := jwt.NewJwtLib(time.Minute*60, []byte(cfg.Secret))
 	authService := auth.New(usersRepository, jwtLib)
 
-	httpServer := application.SetupHTTPServer(cfg, authService, jwtLib)
+	log := slog.Default()
+
+	httpServer, err := application.SetupHTTPServer(cfg, authService, jwtLib, log)
+	if err != nil {
+		slog.Error("Failed to setup HTTP server", "err", err)
+		return
+	}
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.HTTP.Port),

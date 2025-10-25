@@ -1,7 +1,7 @@
 package contextkeys
 
-type CtxKey string
 
-const RequestIDCtxKey CtxKey = "request_id"
-const TraceIDCtxKey CtxKey = "trace_id"
-const UserIDCtxKey CtxKey = "user_id"
+
+const RequestIDCtxKey string = "request_id"
+const TraceIDCtxKey string = "trace_id"
+const UserIDCtxKey string = "user_id"

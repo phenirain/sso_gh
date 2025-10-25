@@ -1,0 +1,86 @@
+package report
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/phenirain/sso/internal/dto/response"
+	pb "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api/admin"
+	"gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api/admin/messages/report"
+)
+
+type ReportHandler struct {
+	s pb.ReportServiceClient
+}
+
+func NewReportHandler(reportService pb.ReportServiceClient) *ReportHandler {
+	return &ReportHandler{
+		s: reportService,
+	}
+}
+
+// GetAmountOfOrdersByTimeOfDay - получение количества заказов по времени суток
+// @Summary Get amount of orders by time of day
+// @Tags admin-report
+// @Accept json
+// @Produce json
+// @Param request body report.ReportRequest true "Report request"
+// @Success 200 {object} response.Response[report.OrdersByTimeOfDayResponse]
+// @Router /admin/report/orders-by-time [post]
+func (h *ReportHandler) GetAmountOfOrdersByTimeOfDay(c echo.Context) error {
+	var req report.ReportRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
+	}
+
+	result, err := h.s.GetAmountOfOrdersByTimeOfDay(c.Request().Context(), &req)
+	if err != nil {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка получения данных по времени суток", err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, response.NewSuccessResponse(&result))
+}
+
+// GetPurchasesByBrands - получение покупок по брендам
+// @Summary Get purchases by brands
+// @Tags admin-report
+// @Accept json
+// @Produce json
+// @Param request body report.ReportRequest true "Report request"
+// @Success 200 {object} response.Response[report.PurchasesByBrandsResponse]
+// @Router /admin/report/purchases-by-brands [post]
+func (h *ReportHandler) GetPurchasesByBrands(c echo.Context) error {
+	var req report.ReportRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
+	}
+
+	result, err := h.s.GetPurchasesByBrands(c.Request().Context(), &req)
+	if err != nil {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка получения данных по брендам", err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, response.NewSuccessResponse(&result))
+}
+
+// GetAverageOrderProcessingTime - получение среднего времени обработки заказов
+// @Summary Get average order processing time
+// @Tags admin-report
+// @Accept json
+// @Produce json
+// @Param request body report.ReportRequest true "Report request"
+// @Success 200 {object} response.Response[report.AverageOrderProcessingTimeResponse]
+// @Router /admin/report/average-processing-time [post]
+func (h *ReportHandler) GetAverageOrderProcessingTime(c echo.Context) error {
+	var req report.ReportRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
+	}
+
+	result, err := h.s.GetAverageOrderProcessingTime(c.Request().Context(), &req)
+	if err != nil {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка получения данных по времени обработки", err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, response.NewSuccessResponse(&result))
+}

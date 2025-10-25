@@ -1,6 +1,5 @@
 package response
 
-
 // ApiResponse — универсальный тип ответа
 type ApiResponse[T any] struct {
 	// Статус ответа
@@ -16,6 +15,9 @@ type ApiResponse[T any] struct {
 	Details string `json:"details,omitempty"`
 }
 
+// Response — алиас для совместимости
+type Response[T any] = ApiResponse[T]
+
 func NewBadResponse[T any](message, details string) ApiResponse[T] {
 	return ApiResponse[T]{
 		Success: false,
@@ -27,6 +29,13 @@ func NewBadResponse[T any](message, details string) ApiResponse[T] {
 func NewSuccessResponse[T any](data *T) ApiResponse[T] {
 	return ApiResponse[T]{
 		Success: true,
-		Data: data,
+		Data:    data,
+	}
+}
+
+func NewSuccessResponseEmpty(message string) ApiResponse[any] {
+	return ApiResponse[any]{
+		Success: true,
+		Message: message,
 	}
 }

@@ -12,12 +12,20 @@ type Config struct {
 	ConnectionString string     `mapstructure:"connection_string"`
 	AllowedOrigins   []string   `mapstructure:"allowed_origins"`
 	Secret           string     `mapstructure:"secret"`
+	APIAddress       string     `mapstructure:"api_address"`
 	HTTP             HTTPConfig `mapstructure:"http"`
+	GRPC             GRPCConfig `mapstructure:"grpc"`
 }
 
 type HTTPConfig struct {
 	Port    int           `mapstructure:"port"`
 	Timeout time.Duration `mapstructure:"timeout"`
+}
+
+type GRPCConfig struct {
+	Admin string `mapstructure:"admin"`
+	Client string `mapstructure:"client"`
+	Manager string `mapstructure:"manager"`
 }
 
 func LoadConfig() (*Config, error) {
