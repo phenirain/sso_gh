@@ -1,6 +1,7 @@
 env: "dev"
-connection_string: "postgres://phenirain:phenirain13%29@localhost5432/FourthCourseFirstProject?sslmode=disable"
+connection_string: "postgres://phenirain:phenirain13%29@147.45.197.137:5432/FourthCourseFirstProject?sslmode=disable"
 secret: "fourthcoursefirthproject"
+api_address: "localhost:8080"
 allowed_origins:
     - https://app.example.com
     - https://admin.example.com
@@ -10,3 +11,7 @@ allowed_origins:
 http:
   port: 8081
   timeout: 15m
+grpc: 
+  admin: "localhost:8080"
+  client: "localhost:8080"
+  manager: "localhost:8080"

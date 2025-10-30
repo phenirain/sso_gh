@@ -3,8 +3,8 @@
 # ----------------------
 FROM golang:1.25-alpine AS builder
 
-# Install necessary dependencies
-RUN apk add --no-cache git ca-certificates
+# Install necessary dependencies including build tools for C dependencies
+RUN apk add --no-cache git ca-certificates gcc libc-dev
 
 # Set working directory
 WORKDIR /app

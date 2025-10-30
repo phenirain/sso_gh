@@ -112,16 +112,13 @@ func (h *ProductHandler) CreateOrUpdateProduct(c echo.Context) error {
 // GetProductByArticle - получение продукта по артикулу
 // @Summary Get product by article
 // @Tags admin-product
-// @Accept json
 // @Produce json
-// @Param request body api.ProductArticleRequest true "Product article request"
+// @Param article path string true "Product article"
 // @Success 200 {object} response.Response[api.ExtendedProductResponse]
-// @Router /admin/product/by-article [post]
+// @Router /admin/product/{article} [get]
 func (h *ProductHandler) GetProductByArticle(c echo.Context) error {
 	var req api.ProductArticleRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
-	}
+	req.Article = c.Param("article")
 
 	result, err := h.s.GetProductByArticle(c.Request().Context(), &req)
 	if err != nil {
@@ -149,16 +146,13 @@ func (h *ProductHandler) GetProducts(c echo.Context) error {
 // DeleteProduct - удаление продукта
 // @Summary Delete product
 // @Tags admin-product
-// @Accept json
 // @Produce json
-// @Param request body api.ProductArticleRequest true "Product article request"
+// @Param article path string true "Product article"
 // @Success 200 {object} response.Response[string]
-// @Router /admin/product [delete]
+// @Router /admin/product/{article} [delete]
 func (h *ProductHandler) DeleteProduct(c echo.Context) error {
 	var req api.ProductArticleRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
-	}
+	req.Article = c.Param("article")
 
 	_, err := h.s.DeleteProduct(c.Request().Context(), &req)
 	if err != nil {

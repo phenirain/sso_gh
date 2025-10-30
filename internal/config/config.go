@@ -30,7 +30,7 @@ type GRPCConfig struct {
 
 func LoadConfig() (*Config, error) {
 
-	viper.SetConfigFile("../../config/config.yaml")
+	viper.SetConfigFile("./config/config.yaml")
 
 	var cfg Config
 	err := viper.ReadInConfig()

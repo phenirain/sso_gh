@@ -8,6 +8,585 @@
     },
     "basePath": "/",
     "paths": {
+        "/admin/client": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-client"
+                ],
+                "summary": "Get all clients",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_ClientsResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-client"
+                ],
+                "summary": "Create client",
+                "parameters": [
+                    {
+                        "description": "Client request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ClientRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/client/users": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-client"
+                ],
+                "summary": "Get users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_ClientUsersResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/client/{id}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-client"
+                ],
+                "summary": "Delete client",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/order": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-order"
+                ],
+                "summary": "Create or update order",
+                "parameters": [
+                    {
+                        "description": "Order request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.OrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/order/clients": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-order"
+                ],
+                "summary": "Get order clients",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderClientsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/order/products": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-order"
+                ],
+                "summary": "Get order products",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderProductsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/order/statuses": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-order"
+                ],
+                "summary": "Get order statuses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderStatusesResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/order/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-order"
+                ],
+                "summary": "Get order by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-order"
+                ],
+                "summary": "Delete order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-order"
+                ],
+                "summary": "Get orders",
+                "parameters": [
+                    {
+                        "description": "Get orders request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.GetOrdersRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/product": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-product"
+                ],
+                "summary": "Get all products",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-product"
+                ],
+                "summary": "Create or update product",
+                "parameters": [
+                    {
+                        "description": "Product request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/product.ProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-product"
+                ],
+                "summary": "Delete product",
+                "parameters": [
+                    {
+                        "description": "Product article request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ProductArticleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/product/base-model": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-product"
+                ],
+                "summary": "Create or update base model",
+                "parameters": [
+                    {
+                        "description": "Base model request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/product.BaseModelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-product"
+                ],
+                "summary": "Delete base model",
+                "parameters": [
+                    {
+                        "description": "Delete base model request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/product.DeleteBaseModelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/product/base-models": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-product"
+                ],
+                "summary": "Get all base models",
+                "parameters": [
+                    {
+                        "description": "Get base models request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.GetBaseModelsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/product/{article}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-product"
+                ],
+                "summary": "Get product by article",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product article",
+                        "name": "article",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/report/average-processing-time": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-report"
+                ],
+                "summary": "Get average order processing time",
+                "parameters": [
+                    {
+                        "description": "Report request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/report.ReportRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_AverageOrderProcessingTimeResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/report/orders-by-time": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-report"
+                ],
+                "summary": "Get amount of orders by time of day",
+                "parameters": [
+                    {
+                        "description": "Report request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/report.ReportRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_OrdersByTimeOfDayResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/report/purchases-by-brands": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-report"
+                ],
+                "summary": "Get purchases by brands",
+                "parameters": [
+                    {
+                        "description": "Report request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/report.ReportRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_PurchasesByBrandsResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/logIn": {
             "post": {
                 "consumes": [
@@ -92,9 +671,826 @@
                     }
                 }
             }
+        },
+        "/client/order": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-order"
+                ],
+                "summary": "Get client orders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-order"
+                ],
+                "summary": "Create order",
+                "parameters": [
+                    {
+                        "description": "Create order request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/order/add-product": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-order"
+                ],
+                "summary": "Add product to order",
+                "parameters": [
+                    {
+                        "description": "Product into order request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/order/complete": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-order"
+                ],
+                "summary": "Complete order",
+                "parameters": [
+                    {
+                        "description": "Complete order request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/order/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-order"
+                ],
+                "summary": "Get order by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/order/{id}/cancel": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-order"
+                ],
+                "summary": "Cancel order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/product": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-product"
+                ],
+                "summary": "Get products",
+                "parameters": [
+                    {
+                        "description": "Get products request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/product/base-models": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-product"
+                ],
+                "summary": "Get all base models",
+                "parameters": [
+                    {
+                        "description": "Get base models request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/product/favorites": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-product"
+                ],
+                "summary": "Get favorite products",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-product"
+                ],
+                "summary": "Action product to favorites",
+                "parameters": [
+                    {
+                        "description": "Product into favorites request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/product/{article}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-product"
+                ],
+                "summary": "Get product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product article",
+                        "name": "article",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/profile": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client"
+                ],
+                "summary": "Get client profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client"
+                ],
+                "summary": "Fill client profile",
+                "parameters": [
+                    {
+                        "description": "Client request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/register": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client"
+                ],
+                "summary": "Register client",
+                "parameters": [
+                    {
+                        "description": "Client request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/{id}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client"
+                ],
+                "summary": "Delete client",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/manager/order": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manager"
+                ],
+                "summary": "Get all orders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/manager/order/give": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manager"
+                ],
+                "summary": "Give order",
+                "parameters": [
+                    {
+                        "description": "Paid order request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/manager.PaidOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
+        "/manager/order/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manager"
+                ],
+                "summary": "Get order by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/manager/order/{id}/cancel": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manager"
+                ],
+                "summary": "Cancel order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "api.BaseModelResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "is_archived": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.BaseModelsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.BaseModelResponse"
+                    }
+                }
+            }
+        },
+        "api.ClientRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.ClientResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ExtendedOrderResponse": {
+            "type": "object",
+            "properties": {
+                "change_amount": {
+                    "type": "number"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "orderInfo": {
+                    "$ref": "#/definitions/api.OrderResponse"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderProduct"
+                    }
+                },
+                "received_amount": {
+                    "type": "number"
+                },
+                "statuses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderStatus"
+                    }
+                }
+            }
+        },
+        "api.ExtendedProductResponse": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "productInfo": {
+                    "$ref": "#/definitions/api.ProductResponse"
+                },
+                "product_type": {
+                    "type": "string"
+                },
+                "texture": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "integer"
+                },
+                "volume_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.GetBaseModelsRequest": {
+            "type": "object",
+            "properties": {
+                "base_model": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.OrderClient": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.OrderProduct": {
+            "type": "object",
+            "properties": {
+                "article": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "client": {
+                    "$ref": "#/definitions/api.OrderClient"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "api.OrderStatus": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.OrdersResponse": {
+            "type": "object",
+            "properties": {
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderResponse"
+                    }
+                }
+            }
+        },
+        "api.ProductArticleRequest": {
+            "type": "object",
+            "properties": {
+                "article": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "article": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "is_archived": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.ProductsResponse": {
+            "type": "object",
+            "properties": {
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ProductResponse"
+                    }
+                }
+            }
+        },
+        "client.ClientUsersResponse": {
+            "type": "object",
+            "properties": {
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/client.ClientUsersResponse_User"
+                    }
+                }
+            }
+        },
+        "client.ClientUsersResponse_User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.ClientsResponse": {
+            "type": "object",
+            "properties": {
+                "clients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ClientResponse"
+                    }
+                }
+            }
+        },
         "github_com_phenirain_sso_internal_dto_auth.AuthRequest": {
             "type": "object",
             "properties": {
@@ -119,6 +1515,684 @@
                 },
                 "refresh_token": {
                     "description": "Refresh Token для обновления пары токенов",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.BaseModelResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.BaseModelsResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.ClientResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.ExtendedOrderResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.ExtendedProductResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.OrdersResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/api.ProductsResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-client_ClientUsersResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/client.ClientUsersResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-client_ClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/client.ClientsResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/order.ClientOrderResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-order_OrderClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/order.OrderClientsResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-order_OrderProductsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/order.OrderProductsResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-order_OrderStatusesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/order.OrderStatusesResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-report_AverageOrderProcessingTimeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/report.AverageOrderProcessingTimeResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-report_OrdersByTimeOfDayResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/report.OrdersByTimeOfDayResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-report_PurchasesByBrandsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/report.PurchasesByBrandsResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-string": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "type": "string"
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "manager.PaidOrderRequest": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "integer"
+                },
+                "paid_amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "order.ClientOrderResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderProduct"
+                    }
+                },
+                "statuses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderStatus"
+                    }
+                },
+                "total_amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "order.GetOrdersRequest": {
+            "type": "object",
+            "properties": {
+                "status_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "order.OrderClientsResponse": {
+            "type": "object",
+            "properties": {
+                "clients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderClient"
+                    }
+                }
+            }
+        },
+        "order.OrderProductsResponse": {
+            "type": "object",
+            "properties": {
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderProduct"
+                    }
+                }
+            }
+        },
+        "order.OrderRequest": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderProduct"
+                    }
+                },
+                "received_amount": {
+                    "type": "number"
+                },
+                "status_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "order.OrderStatusesResponse": {
+            "type": "object",
+            "properties": {
+                "statuses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.OrderStatus"
+                    }
+                }
+            }
+        },
+        "product.BaseModelRequest": {
+            "type": "object",
+            "properties": {
+                "base_model": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_archived": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "product.DeleteBaseModelRequest": {
+            "type": "object",
+            "properties": {
+                "base_model": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "product.ProductRequest": {
+            "type": "object",
+            "properties": {
+                "article": {
+                    "type": "string"
+                },
+                "article_old": {
+                    "type": "string"
+                },
+                "brand_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "is_archived": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_type_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "texture_id": {
+                    "type": "integer"
+                },
+                "volume": {
+                    "type": "integer"
+                },
+                "volume_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "report.AverageOrderProcessingTimeResponse": {
+            "type": "object",
+            "properties": {
+                "units": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.AverageOrderProcessingTimeResponse_Unit"
+                    }
+                }
+            }
+        },
+        "report.AverageOrderProcessingTimeResponse_Unit": {
+            "type": "object",
+            "properties": {
+                "avg_time_to_checkout_minutes": {
+                    "type": "number"
+                },
+                "avg_time_to_receive_minutes": {
+                    "type": "number"
+                }
+            }
+        },
+        "report.OrdersByTimeOfDayResponse": {
+            "type": "object",
+            "properties": {
+                "units": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.OrdersByTimeOfDayResponse_Unit"
+                    }
+                }
+            }
+        },
+        "report.OrdersByTimeOfDayResponse_Unit": {
+            "type": "object",
+            "properties": {
+                "order_count": {
+                    "type": "integer"
+                },
+                "time_of_day": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.PurchasesByBrandsResponse": {
+            "type": "object",
+            "properties": {
+                "units": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.PurchasesByBrandsResponse_Unit"
+                    }
+                }
+            }
+        },
+        "report.PurchasesByBrandsResponse_Unit": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string"
+                },
+                "purchase_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "report.ReportRequest": {
+            "type": "object",
+            "properties": {
+                "period": {
+                    "description": "период: сегодня, вчера, неделя, месяц, год",
                     "type": "string"
                 }
             }

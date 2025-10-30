@@ -12,10 +12,11 @@ import (
 	adminProduct "github.com/phenirain/sso/internal/application/admin/product"
 	adminReport "github.com/phenirain/sso/internal/application/admin/report"
 	"github.com/phenirain/sso/internal/application/auth"
-	"github.com/phenirain/sso/internal/application/client"
-	"github.com/phenirain/sso/internal/application/manager"
+	clientClient "github.com/phenirain/sso/internal/application/client/client"
+	clientOrder "github.com/phenirain/sso/internal/application/client/order"
+	clientProduct "github.com/phenirain/sso/internal/application/client/product"
+	manager "github.com/phenirain/sso/internal/application/manager"
 	"github.com/phenirain/sso/internal/config"
-	grpcService "github.com/phenirain/sso/internal/services/grpc"
 	"github.com/phenirain/sso/pkg/echomiddleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	pbAdmin "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api/admin"
@@ -114,9 +115,9 @@ func registerAdminRoutes(
 	productGroup.POST("/base-models", productHandler.GetAllBaseModels)
 	productGroup.DELETE("/base-model", productHandler.DeleteBaseModel)
 	productGroup.POST("", productHandler.CreateOrUpdateProduct)
-	productGroup.POST("/by-article", productHandler.GetProductByArticle)
+	productGroup.GET(":article", productHandler.GetProductByArticle)
 	productGroup.GET("", productHandler.GetProducts)
-	productGroup.DELETE("", productHandler.DeleteProduct)
+	productGroup.DELETE(":article", productHandler.DeleteProduct)
 
 	// Order routes
 	orderHandler := adminOrder.NewOrderHandler(orderService)
@@ -125,8 +126,8 @@ func registerAdminRoutes(
 	orderGroup.GET("/clients", orderHandler.GetOrderClients)
 	orderGroup.GET("/products", orderHandler.GetOrderProducts)
 	orderGroup.POST("", orderHandler.CreateOrUpdateOrder)
-	orderGroup.POST("/by-id", orderHandler.GetOrderById)
-	orderGroup.DELETE("", orderHandler.DeleteOrder)
+	orderGroup.GET(":id", orderHandler.GetOrderById)
+	orderGroup.DELETE(":id", orderHandler.DeleteOrder)
 
 	// Client routes
 	clientHandler := adminClient.NewClientHandler(clientService)
@@ -134,7 +135,7 @@ func registerAdminRoutes(
 	clientGroup.GET("/users", clientHandler.GetUsers)
 	clientGroup.POST("", clientHandler.CreateClient)
 	clientGroup.GET("", clientHandler.GetClients)
-	clientGroup.DELETE("", clientHandler.DeleteClient)
+	clientGroup.DELETE(":id", clientHandler.DeleteClient)
 
 	// Report routes
 	reportHandler := adminReport.NewReportHandler(reportService)
@@ -153,57 +154,49 @@ func registerClientRoutes(
 	productServiceClient pbClient.ProductServiceClient,
 	orderServiceClient pbClient.OrderServiceClient,
 ) {
-	// Создаем wrapper для сервисов
-	clientServiceWrapper := grpcService.NewClientServiceWrapper(
-		clientServiceClient,
-		productServiceClient,
-		orderServiceClient,
-	)
-
-	clientHandler := client.NewHandler(clientServiceWrapper)
 	clientGroup := e.Group("/client")
 
 	// Client profile routes
-	clientGroup.POST("/register", clientHandler.RegisterClient)
-	clientGroup.POST("/profile", clientHandler.FillClientProfile)
-	clientGroup.GET("/profile", clientHandler.GetClientProfile)
-	clientGroup.DELETE("", clientHandler.DeleteClient)
+	cHandler := clientClient.NewClientHandler(clientServiceClient)
+	clientGroup.POST("/register", cHandler.RegisterClient)
+	clientGroup.POST("/profile", cHandler.FillClientProfile)
+	clientGroup.GET("/profile/:id", cHandler.GetClientProfile)
+	clientGroup.DELETE(":id", cHandler.DeleteClient)
 
 	// Product routes
+	pHandler := clientProduct.NewProductHandler(productServiceClient)
 	productGroup := clientGroup.Group("/product")
-	productGroup.POST("/base-models", clientHandler.GetAllBaseModels)
-	productGroup.POST("", clientHandler.GetProducts)
-	productGroup.POST("/by-article", clientHandler.GetProduct)
-	productGroup.POST("/favorites", clientHandler.ActionProductToFavorites)
-	productGroup.GET("/favorites", clientHandler.GetFavoriteProducts)
+	productGroup.POST("/base-models", pHandler.GetAllBaseModels)
+	productGroup.POST("", pHandler.GetProducts)
+	productGroup.GET(":article", pHandler.GetProduct)
+	productGroup.POST("/favorites", pHandler.ActionProductToFavorites)
+	productGroup.GET(":id/favorites", pHandler.GetFavoriteProducts)
 
 	// Order routes
+	oHandler := clientOrder.NewOrderHandler(orderServiceClient)
 	orderGroup := clientGroup.Group("/order")
-	orderGroup.POST("", clientHandler.CreateOrder)
-	orderGroup.POST("/complete", clientHandler.CompleteOrder)
-	orderGroup.POST("/add-product", clientHandler.AddProductToOrder)
-	orderGroup.GET("", clientHandler.GetClientOrders)
-	orderGroup.POST("/by-id", clientHandler.GetOrderById)
-	orderGroup.POST("/cancel", clientHandler.CancelOrder)
+	orderGroup.POST("", oHandler.CreateOrder)
+	orderGroup.POST("/complete", oHandler.CompleteOrder)
+	orderGroup.POST("/add-product", oHandler.AddProductToOrder)
+	orderGroup.GET("", oHandler.GetClientOrders)
+	orderGroup.GET(":id", oHandler.GetOrderById)
+	orderGroup.POST(":id/cancel", oHandler.CancelOrder)
 
 	// Orders list route
-	clientGroup.GET("/orders", clientHandler.GetClientOrders)
+	clientGroup.GET("/orders", oHandler.GetClientOrders)
 }
 
 func registerManagerRoutes(e *echo.Echo, managerServiceClient pbManager.ManagerServiceClient) {
-	// Создаем wrapper для сервиса
-	managerServiceWrapper := grpcService.NewManagerServiceWrapper(managerServiceClient)
-
-	managerHandler := manager.NewHandler(managerServiceWrapper)
 	managerGroup := e.Group("/manager")
 
 	// Order routes
+	oHandler := manager.NewOrderHandler(managerServiceClient)
 	orderGroup := managerGroup.Group("/order")
-	orderGroup.GET("", managerHandler.GetAllOrders)
-	orderGroup.POST("/by-id", managerHandler.GetOrderById)
-	orderGroup.POST("/give", managerHandler.GiveOrder)
-	orderGroup.POST("/cancel", managerHandler.CancelOrder)
+	orderGroup.GET("", oHandler.GetAllOrders)
+	orderGroup.GET(":id", oHandler.GetOrderById)
+	orderGroup.POST("/give", oHandler.GiveOrder)
+	orderGroup.POST(":id/cancel", oHandler.CancelOrder)
 
 	// Orders list route
-	managerGroup.GET("/orders", managerHandler.GetAllOrders)
+	managerGroup.GET("/orders", oHandler.GetAllOrders)
 }

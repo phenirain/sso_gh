@@ -27,13 +27,14 @@ func NewReportHandler(reportService pb.ReportServiceClient) *ReportHandler {
 // @Param request body report.ReportRequest true "Report request"
 // @Success 200 {object} response.Response[report.OrdersByTimeOfDayResponse]
 // @Router /admin/report/orders-by-time [post]
-func (h *ReportHandler) GetAmountOfOrdersByTimeOfDay(c echo.Context) error {
+func (h *ReportHandler) GetAmountOfOrdersByTimeOfDay(c echo.Context) (err error) {
+	var result *report.OrdersByTimeOfDayResponse
 	var req report.ReportRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
 	}
 
-	result, err := h.s.GetAmountOfOrdersByTimeOfDay(c.Request().Context(), &req)
+	result, err = h.s.GetAmountOfOrdersByTimeOfDay(c.Request().Context(), &req)
 	if err != nil {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка получения данных по времени суток", err.Error()))
 	}
@@ -49,13 +50,14 @@ func (h *ReportHandler) GetAmountOfOrdersByTimeOfDay(c echo.Context) error {
 // @Param request body report.ReportRequest true "Report request"
 // @Success 200 {object} response.Response[report.PurchasesByBrandsResponse]
 // @Router /admin/report/purchases-by-brands [post]
-func (h *ReportHandler) GetPurchasesByBrands(c echo.Context) error {
+func (h *ReportHandler) GetPurchasesByBrands(c echo.Context) (err error) {
+	var result *report.PurchasesByBrandsResponse
 	var req report.ReportRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
 	}
 
-	result, err := h.s.GetPurchasesByBrands(c.Request().Context(), &req)
+	result, err = h.s.GetPurchasesByBrands(c.Request().Context(), &req)
 	if err != nil {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка получения данных по брендам", err.Error()))
 	}
@@ -71,13 +73,14 @@ func (h *ReportHandler) GetPurchasesByBrands(c echo.Context) error {
 // @Param request body report.ReportRequest true "Report request"
 // @Success 200 {object} response.Response[report.AverageOrderProcessingTimeResponse]
 // @Router /admin/report/average-processing-time [post]
-func (h *ReportHandler) GetAverageOrderProcessingTime(c echo.Context) error {
+func (h *ReportHandler) GetAverageOrderProcessingTime(c echo.Context) (err error) {
+	var result *report.AverageOrderProcessingTimeResponse
 	var req report.ReportRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
 	}
 
-	result, err := h.s.GetAverageOrderProcessingTime(c.Request().Context(), &req)
+	result, err = h.s.GetAverageOrderProcessingTime(c.Request().Context(), &req)
 	if err != nil {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка получения данных по времени обработки", err.Error()))
 	}

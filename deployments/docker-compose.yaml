@@ -1,0 +1,8 @@
+services:
+  sso:
+    image: phenirain/fourthcoursefirstproject-sso:latest
+    container_name: sso
+    ports:
+      - "8081:8081"
+      - "7070:6060"
+

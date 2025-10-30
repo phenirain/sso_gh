@@ -1,5 +1,187 @@
 basePath: /
 definitions:
+  api.BaseModelResponse:
+    properties:
+      id:
+        type: integer
+      is_archived:
+        type: boolean
+      name:
+        type: string
+    type: object
+  api.BaseModelsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/api.BaseModelResponse'
+        type: array
+    type: object
+  api.ClientRequest:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  api.ClientResponse:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      login:
+        type: string
+      phone:
+        type: string
+    type: object
+  api.ExtendedOrderResponse:
+    properties:
+      change_amount:
+        type: number
+      description:
+        type: string
+      orderInfo:
+        $ref: '#/definitions/api.OrderResponse'
+      products:
+        items:
+          $ref: '#/definitions/api.OrderProduct'
+        type: array
+      received_amount:
+        type: number
+      statuses:
+        items:
+          $ref: '#/definitions/api.OrderStatus'
+        type: array
+    type: object
+  api.ExtendedProductResponse:
+    properties:
+      brand:
+        type: string
+      description:
+        type: string
+      product_type:
+        type: string
+      productInfo:
+        $ref: '#/definitions/api.ProductResponse'
+      texture:
+        type: string
+      volume:
+        type: integer
+      volume_type:
+        type: string
+    type: object
+  api.GetBaseModelsRequest:
+    properties:
+      base_model:
+        type: string
+    type: object
+  api.OrderClient:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+    type: object
+  api.OrderProduct:
+    properties:
+      article:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  api.OrderResponse:
+    properties:
+      client:
+        $ref: '#/definitions/api.OrderClient'
+      created_at:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      total_amount:
+        type: number
+    type: object
+  api.OrderStatus:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  api.OrdersResponse:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/api.OrderResponse'
+        type: array
+    type: object
+  api.ProductArticleRequest:
+    properties:
+      article:
+        type: string
+    type: object
+  api.ProductResponse:
+    properties:
+      article:
+        type: string
+      image_url:
+        type: string
+      is_archived:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  api.ProductsResponse:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/api.ProductResponse'
+        type: array
+    type: object
+  client.ClientUsersResponse:
+    properties:
+      users:
+        items:
+          $ref: '#/definitions/client.ClientUsersResponse_User'
+        type: array
+    type: object
+  client.ClientUsersResponse_User:
+    properties:
+      id:
+        type: integer
+      login:
+        type: string
+    type: object
+  client.ClientsResponse:
+    properties:
+      clients:
+        items:
+          $ref: '#/definitions/api.ClientResponse'
+        type: array
+    type: object
   github_com_phenirain_sso_internal_dto_auth.AuthRequest:
     properties:
       login:
@@ -20,12 +202,819 @@ definitions:
         description: Refresh Token для обновления пары токенов
         type: string
     type: object
+  github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/api.BaseModelResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/api.BaseModelsResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/api.ClientResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/api.ExtendedOrderResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/api.ExtendedProductResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/api.OrdersResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/api.ProductsResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-client_ClientUsersResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/client.ClientUsersResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-client_ClientsResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/client.ClientsResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/order.ClientOrderResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-order_OrderClientsResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/order.OrderClientsResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-order_OrderProductsResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/order.OrderProductsResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-order_OrderStatusesResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/order.OrderStatusesResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-report_AverageOrderProcessingTimeResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/report.AverageOrderProcessingTimeResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-report_OrdersByTimeOfDayResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/report.OrdersByTimeOfDayResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-report_PurchasesByBrandsResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/report.PurchasesByBrandsResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-string:
+    properties:
+      data:
+        description: Данные ответа
+        type: string
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  manager.PaidOrderRequest:
+    properties:
+      order_id:
+        type: integer
+      paid_amount:
+        type: number
+    type: object
+  order.ClientOrderResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/api.OrderProduct'
+        type: array
+      statuses:
+        items:
+          $ref: '#/definitions/api.OrderStatus'
+        type: array
+      total_amount:
+        type: number
+    type: object
+  order.GetOrdersRequest:
+    properties:
+      status_id:
+        type: integer
+    type: object
+  order.OrderClientsResponse:
+    properties:
+      clients:
+        items:
+          $ref: '#/definitions/api.OrderClient'
+        type: array
+    type: object
+  order.OrderProductsResponse:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/api.OrderProduct'
+        type: array
+    type: object
+  order.OrderRequest:
+    properties:
+      client_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/api.OrderProduct'
+        type: array
+      received_amount:
+        type: number
+      status_id:
+        type: integer
+    type: object
+  order.OrderStatusesResponse:
+    properties:
+      statuses:
+        items:
+          $ref: '#/definitions/api.OrderStatus'
+        type: array
+    type: object
+  product.BaseModelRequest:
+    properties:
+      base_model:
+        type: string
+      id:
+        type: integer
+      is_archived:
+        type: boolean
+      name:
+        type: string
+    type: object
+  product.DeleteBaseModelRequest:
+    properties:
+      base_model:
+        type: string
+      id:
+        type: integer
+    type: object
+  product.ProductRequest:
+    properties:
+      article:
+        type: string
+      article_old:
+        type: string
+      brand_id:
+        type: integer
+      description:
+        type: string
+      image:
+        items:
+          type: integer
+        type: array
+      is_archived:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      product_type_id:
+        type: integer
+      quantity:
+        type: integer
+      texture_id:
+        type: integer
+      volume:
+        type: integer
+      volume_id:
+        type: integer
+    type: object
+  report.AverageOrderProcessingTimeResponse:
+    properties:
+      units:
+        items:
+          $ref: '#/definitions/report.AverageOrderProcessingTimeResponse_Unit'
+        type: array
+    type: object
+  report.AverageOrderProcessingTimeResponse_Unit:
+    properties:
+      avg_time_to_checkout_minutes:
+        type: number
+      avg_time_to_receive_minutes:
+        type: number
+    type: object
+  report.OrdersByTimeOfDayResponse:
+    properties:
+      units:
+        items:
+          $ref: '#/definitions/report.OrdersByTimeOfDayResponse_Unit'
+        type: array
+    type: object
+  report.OrdersByTimeOfDayResponse_Unit:
+    properties:
+      order_count:
+        type: integer
+      time_of_day:
+        type: string
+    type: object
+  report.PurchasesByBrandsResponse:
+    properties:
+      units:
+        items:
+          $ref: '#/definitions/report.PurchasesByBrandsResponse_Unit'
+        type: array
+    type: object
+  report.PurchasesByBrandsResponse_Unit:
+    properties:
+      brand:
+        type: string
+      purchase_count:
+        type: integer
+    type: object
+  report.ReportRequest:
+    properties:
+      period:
+        description: 'период: сегодня, вчера, неделя, месяц, год'
+        type: string
+    type: object
 info:
   contact: {}
   description: SSO service API.
   title: SSO API
   version: "1.0"
 paths:
+  /admin/client:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_ClientsResponse'
+      summary: Get all clients
+      tags:
+      - admin-client
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Client request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.ClientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse'
+      summary: Create client
+      tags:
+      - admin-client
+  /admin/client/{id}:
+    delete:
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Delete client
+      tags:
+      - admin-client
+  /admin/client/users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_ClientUsersResponse'
+      summary: Get users
+      tags:
+      - admin-client
+  /admin/order:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Order request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/order.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse'
+      summary: Create or update order
+      tags:
+      - admin-order
+  /admin/order/{id}:
+    delete:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Delete order
+      tags:
+      - admin-order
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse'
+      summary: Get order by ID
+      tags:
+      - admin-order
+  /admin/order/clients:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderClientsResponse'
+      summary: Get order clients
+      tags:
+      - admin-order
+  /admin/order/products:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderProductsResponse'
+      summary: Get order products
+      tags:
+      - admin-order
+  /admin/order/statuses:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderStatusesResponse'
+      summary: Get order statuses
+      tags:
+      - admin-order
+  /admin/orders:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Get orders request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/order.GetOrdersRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse'
+      summary: Get orders
+      tags:
+      - admin-order
+  /admin/product:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product article request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.ProductArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Delete product
+      tags:
+      - admin-product
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse'
+      summary: Get all products
+      tags:
+      - admin-product
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/product.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse'
+      summary: Create or update product
+      tags:
+      - admin-product
+  /admin/product/{article}:
+    get:
+      parameters:
+      - description: Product article
+        in: path
+        name: article
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse'
+      summary: Get product by article
+      tags:
+      - admin-product
+  /admin/product/base-model:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Delete base model request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/product.DeleteBaseModelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Delete base model
+      tags:
+      - admin-product
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Base model request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/product.BaseModelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelResponse'
+      summary: Create or update base model
+      tags:
+      - admin-product
+  /admin/product/base-models:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Get base models request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.GetBaseModelsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse'
+      summary: Get all base models
+      tags:
+      - admin-product
+  /admin/report/average-processing-time:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Report request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/report.ReportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_AverageOrderProcessingTimeResponse'
+      summary: Get average order processing time
+      tags:
+      - admin-report
+  /admin/report/orders-by-time:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Report request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/report.ReportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_OrdersByTimeOfDayResponse'
+      summary: Get amount of orders by time of day
+      tags:
+      - admin-report
+  /admin/report/purchases-by-brands:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Report request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/report.ReportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_PurchasesByBrandsResponse'
+      summary: Get purchases by brands
+      tags:
+      - admin-report
   /auth/logIn:
     post:
       consumes:
@@ -80,4 +1069,346 @@ paths:
       summary: Register user
       tags:
       - auth
+  /client/{id}:
+    delete:
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Delete client
+      tags:
+      - client
+  /client/order:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse'
+      summary: Get client orders
+      tags:
+      - client-order
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create order request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse'
+      summary: Create order
+      tags:
+      - client-order
+  /client/order/{id}:
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse'
+      summary: Get order by id
+      tags:
+      - client-order
+  /client/order/{id}/cancel:
+    post:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Cancel order
+      tags:
+      - client-order
+  /client/order/add-product:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product into order request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse'
+      summary: Add product to order
+      tags:
+      - client-order
+  /client/order/complete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Complete order request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Complete order
+      tags:
+      - client-order
+  /client/product:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Get products request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse'
+      summary: Get products
+      tags:
+      - client-product
+  /client/product/{article}:
+    get:
+      parameters:
+      - description: Product article
+        in: path
+        name: article
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse'
+      summary: Get product
+      tags:
+      - client-product
+  /client/product/base-models:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Get base models request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse'
+      summary: Get all base models
+      tags:
+      - client-product
+  /client/product/favorites:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse'
+      summary: Get favorite products
+      tags:
+      - client-product
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product into favorites request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Action product to favorites
+      tags:
+      - client-product
+  /client/profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse'
+      summary: Get client profile
+      tags:
+      - client
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Client request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse'
+      summary: Fill client profile
+      tags:
+      - client
+  /client/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Client request
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse'
+      summary: Register client
+      tags:
+      - client
+  /manager/order:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse'
+      summary: Get all orders
+      tags:
+      - manager
+  /manager/order/{id}:
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse'
+      summary: Get order by id
+      tags:
+      - manager
+  /manager/order/{id}/cancel:
+    post:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Cancel order
+      tags:
+      - manager
+  /manager/order/give:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Paid order request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/manager.PaidOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      summary: Give order
+      tags:
+      - manager
 swagger: "2.0"
