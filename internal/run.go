@@ -14,8 +14,6 @@ import (
 	"github.com/phenirain/sso/internal/application"
 	"github.com/phenirain/sso/internal/config"
 	"github.com/phenirain/sso/internal/lib/jwt"
-	"github.com/phenirain/sso/internal/repository/user"
-	"github.com/phenirain/sso/internal/services/auth"
 	"github.com/phenirain/sso/pkg/database"
 	"github.com/phenirain/sso/pkg/logger"
 	"golang.org/x/sync/errgroup"
@@ -44,13 +42,11 @@ func Run(cfg *config.Config) error {
 }
 
 func startServers(ctx context.Context, g *errgroup.Group, db *sqlx.DB, cfg *config.Config) {
-	usersRepository := user.New(db)
 	jwtLib := jwt.NewJwtLib(time.Minute*60, []byte(cfg.Secret))
-	authService := auth.New(usersRepository, jwtLib)
 
 	log := slog.Default()
 
-	httpServer, err := application.SetupHTTPServer(cfg, authService, jwtLib, log)
+	httpServer, err := application.SetupHTTPServer(cfg, db, jwtLib, log)
 	if err != nil {
 		slog.Error("Failed to setup HTTP server", "err", err)
 		return

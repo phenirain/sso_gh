@@ -6,3 +6,10 @@ services:
       - "8081:8081"
       - "7070:6060"
 
+    networks:
+      - deployments_api-network
+    
+
+networks:
+  deployments_api-network:
+    external: true

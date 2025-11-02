@@ -16,4 +16,5 @@ type AuthResponse struct {
 	RefreshToken string `json:"refresh_token"`
 	// Access Token для доступа к защищенным ресурсам
 	AccessToken string `json:"access_token"`
+	
 }

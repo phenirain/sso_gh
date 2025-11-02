@@ -8,6 +8,8 @@ docker_push:
 
 docker_deploy: docker_build docker_push
 
+docker_restart: docker_deploy restart_with_config
+
 docker_compose_up:
 	docker compose -f ./deployments/docker-compose.yaml up -d
 
@@ -16,3 +18,7 @@ docker_compose_down:
 
 swagger_gen:
 	swag init -g cmd/sso/main.go -o docs --parseDependency --parseInternal
+
+restart_with_config:
+	docker cp config/config.yaml sso:/app/config/config.yaml
+	docker restart sso

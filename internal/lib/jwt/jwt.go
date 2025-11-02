@@ -20,10 +20,10 @@ func NewJwtLib(duration time.Duration, secret []byte) *JwtLib {
 	}
 }
 
-//TODO: класть роль
-func (j *JwtLib) NewToken(userId int64) (accessToken string, refreshToken string, error error) {
+func (j *JwtLib) NewToken(userId, role int64) (accessToken string, refreshToken string, error error) {
 	claims := jwt.MapClaims{
 		"sub":  userId,
+		"role": role,
 	}
 	claims["exp"] = time.Now().Add(j.duration).Unix()
 
@@ -42,8 +42,7 @@ func (j *JwtLib) NewToken(userId int64) (accessToken string, refreshToken string
 	return
 }
 
-//TODO доставать роль
-func (j *JwtLib) ParseToken(tokenString string) (int64, error) {
+func (j *JwtLib) ParseToken(tokenString string) (userId int64, roleId int64, err error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -51,14 +50,26 @@ func (j *JwtLib) ParseToken(tokenString string) (int64, error) {
 		return j.secret, nil
 	})
 	if err != nil {
-		return -1, fmt.Errorf("token parse error: %s", err.Error())
+		return -1, -1, fmt.Errorf("token parse error: %s", err.Error())
 	}
 	if !token.Valid {
-		return -1, jwtErrors.ErrInvalidToken
+		return -1, -1, jwtErrors.ErrInvalidToken
 	}
-	uid, ok := token.Claims.(jwt.MapClaims)["sub"]
+
+	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return -1, errors.New("can't get sub from claims")
+		return -1, -1, errors.New("can't get claims")
 	}
-	return int64(uid.(float64)), nil
+
+	uid, ok := claims["sub"]
+	if !ok {
+		return -1, -1, errors.New("can't get sub from claims")
+	}
+
+	role, ok := claims["role"]
+	if !ok {
+		return -1, -1, errors.New("can't get role from claims")
+	}
+
+	return int64(uid.(float64)), int64(role.(float64)), nil
 }

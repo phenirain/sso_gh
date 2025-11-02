@@ -10,8 +10,14 @@ import (
 )
 
 type Jwt interface {
-	ParseToken(tokenString string) (int64, error)
+	ParseToken(tokenString string) (userId int64, roleId int64, err error)
 }
+
+const (
+	RoleClient  int64 = 1
+	RoleManager int64 = 2
+	RoleAdmin   int64 = 3
+)
 
 func JwtValidation(jwt Jwt) echo.MiddlewareFunc {
 	skip := map[string]struct{}{
@@ -20,10 +26,15 @@ func JwtValidation(jwt Jwt) echo.MiddlewareFunc {
 		"/auth/refresh": {},
 		"/health":       {},
 		"/swagger/*":    {},
+		"/v":            {},
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			// Пропускаем OPTIONS запросы (CORS preflight)
+			if c.Request().Method == http.MethodOptions {
+				return next(c)
+			}
 
 			p := c.Path()
 			if _, ok := skip[p]; ok {
@@ -41,7 +52,7 @@ func JwtValidation(jwt Jwt) echo.MiddlewareFunc {
 			}
 			tokenString := parts[1]
 
-			userId, err := jwt.ParseToken(tokenString)
+			userId, roleId, err := jwt.ParseToken(tokenString)
 			if err != nil {
 				return c.JSON(http.StatusUnauthorized, map[string]string{
 					"error": err.Error(),
@@ -50,9 +61,35 @@ func JwtValidation(jwt Jwt) echo.MiddlewareFunc {
 
 			ctx := c.Request().Context()
 			ctx = context.WithValue(ctx, contextkeys.UserIDCtxKey, userId)
+			ctx = context.WithValue(ctx, contextkeys.RoleIDCtxKey, roleId)
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			return next(c)
+		}
+	}
+}
+
+// RoleMiddleware проверяет, что роль пользователя соответствует разрешенным ролям
+func RoleMiddleware(allowedRoles ...int64) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			roleId, ok := c.Request().Context().Value(contextkeys.RoleIDCtxKey).(int64)
+			if !ok {
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"error": "role not found in context",
+				})
+			}
+
+			// Проверяем, есть ли роль пользователя в списке разрешенных
+			for _, allowedRole := range allowedRoles {
+				if roleId == allowedRole {
+					return next(c)
+				}
+			}
+
+			return c.JSON(http.StatusForbidden, map[string]string{
+				"error": "access denied: insufficient permissions",
+			})
 		}
 	}
 }

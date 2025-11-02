@@ -10,11 +10,14 @@ import (
 	"github.com/phenirain/sso/internal/dto/auth"
 	authErrors "github.com/phenirain/sso/internal/errors/auth"
 	"github.com/phenirain/sso/internal/errors/jwt"
+	"github.com/phenirain/sso/pkg/contextkeys"
+	api "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api"
+	pb "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api/client"
 )
 
 type Jwt interface {
-	NewToken(userId int64) (accessToken string, refreshToken string, error error)
-	ParseToken(tokenString string) (int64, error)
+	NewToken(userId, role int64) (accessToken string, refreshToken string, error error)
+	ParseToken(tokenString string) (userId int64, roleId int64, err error)
 }
 
 type Repository interface {
@@ -23,16 +26,17 @@ type Repository interface {
 	CreateUser(ctx context.Context, user *domain.User) (int64, error)
 }
 
-
 type Auth struct {
-	repo  Repository
-	jwt Jwt
+	s    pb.ClientServiceClient
+	repo Repository
+	jwt  Jwt
 }
 
-func New(repo Repository, jwt Jwt) *Auth {
+func New(repo Repository, jwt Jwt, clientService pb.ClientServiceClient) *Auth {
 	return &Auth{
-		repo:  repo,
-		jwt: jwt,
+		repo: repo,
+		jwt:  jwt,
+		s:    clientService,
 	}
 }
 
@@ -44,7 +48,8 @@ func (a *Auth) Auth(ctx context.Context, request auth.AuthRequest, isNew bool) (
 		slog.Error("failed to get user", "err", err)
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
-	var userId int64 
+	var userId int64
+	var role int64
 	// если создание
 	if isNew {
 		// если пользователь найден - уже существует
@@ -53,11 +58,23 @@ func (a *Auth) Auth(ctx context.Context, request auth.AuthRequest, isNew bool) (
 		}
 
 		user = domain.NewUser(request.Login, request.Password, nil, nil)
+		role = 1
 		userId, err = a.repo.CreateUser(ctx, user)
 		if err != nil {
 			errText := fmt.Errorf("ошибка в ходе создания пользователя: %w", err)
 			slog.Error(errText.Error())
 			return nil, errText
+		}
+
+		req := api.ClientRequest{
+			Email:  &request.Login,
+			UserId: &userId,
+		}
+
+		ctx = context.WithValue(ctx, contextkeys.UserIDCtxKey, userId)
+		_, err = a.s.RegisterClient(ctx, &req)
+		if err != nil {
+			return nil, fmt.Errorf("ошибка регистрации клиента: %w", err)
 		}
 	} else { // если авторизация
 		// если пользователь не найден
@@ -70,15 +87,16 @@ func (a *Auth) Auth(ctx context.Context, request auth.AuthRequest, isNew bool) (
 			return nil, authErrors.ErrInvalidUserCredentials
 		}
 		userId = user.Id
+		role = user.RoleId
 	}
 
-	return a.getAuthResponse(userId)
+	return a.getAuthResponse(userId, role)
 }
 
 func (a *Auth) Refresh(ctx context.Context, refreshToken string) (*auth.AuthResponse, error) {
 
 	// проверка токена
-	userId, err := a.jwt.ParseToken(refreshToken)
+	userId, roleId, err := a.jwt.ParseToken(refreshToken)
 	if err != nil {
 		if errors.Is(err, jwt.ErrInvalidToken) {
 			return nil, err
@@ -99,11 +117,18 @@ func (a *Auth) Refresh(ctx context.Context, refreshToken string) (*auth.AuthResp
 		return nil, authErrors.ErrUserNotFound
 	}
 
-	return a.getAuthResponse(userId)
+	// Используем роль из токена, но можно проверить соответствие с ролью в БД
+	if roleId != user.RoleId {
+		slog.Warn("role mismatch between token and database", "tokenRole", roleId, "dbRole", user.RoleId)
+		// Используем роль из БД как источник истины
+		roleId = user.RoleId
+	}
+
+	return a.getAuthResponse(userId, roleId)
 }
 
-func (a *Auth) getAuthResponse(userId int64) (*auth.AuthResponse, error) {
-	accessToken, refreshToken, err := a.jwt.NewToken(userId)
+func (a *Auth) getAuthResponse(userId, role int64) (*auth.AuthResponse, error) {
+	accessToken, refreshToken, err := a.jwt.NewToken(userId, role)
 	if err != nil {
 		errorText := fmt.Errorf("ошибка генерации токенов доступа: %w", err)
 		slog.Error(errorText.Error())
@@ -111,7 +136,7 @@ func (a *Auth) getAuthResponse(userId int64) (*auth.AuthResponse, error) {
 	}
 
 	return &auth.AuthResponse{
-		AccessToken: accessToken,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
 }

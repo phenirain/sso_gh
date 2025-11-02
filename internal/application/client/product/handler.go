@@ -43,15 +43,65 @@ func (h *ProductHandler) GetAllBaseModels(c echo.Context) error {
 // GetProducts - получить продукты
 // @Summary Get products
 // @Tags client-product
-// @Accept json
 // @Produce json
-// @Param request body any true "Get products request"
+// @Param limit query int false "Limit" default(10)
+// @Param offset query int false "Offset" default(0)
+// @Param min_price query number false "Minimum price"
+// @Param max_price query number false "Maximum price"
+// @Param brand_id query int false "Brand ID"
+// @Param term query string false "Search term (article, name, brand)"
 // @Success 200 {object} response.Response[api.ProductsResponse]
-// @Router /client/product [post]
+// @Router /client/product [get]
 func (h *ProductHandler) GetProducts(c echo.Context) error {
-	var req msg.GetProductsRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
+	req := msg.GetProductsRequest{}
+
+	// Получаем параметры из query с базовыми значениями
+	// Limit - по умолчанию 10
+	if limitStr := c.QueryParam("limit"); limitStr != "" {
+		if limit, err := strconv.ParseInt(limitStr, 10, 32); err == nil {
+			limit32 := int32(limit)
+			req.Limit = &limit32
+		}
+	} else {
+		defaultLimit := int32(10)
+		req.Limit = &defaultLimit
+	}
+
+	// Offset - по умолчанию 0
+	if offsetStr := c.QueryParam("offset"); offsetStr != "" {
+		if offset, err := strconv.ParseInt(offsetStr, 10, 32); err == nil {
+			offset32 := int32(offset)
+			req.Offset = &offset32
+		}
+	} else {
+		defaultOffset := int32(0)
+		req.Offset = &defaultOffset
+	}
+
+	// MinPrice - опциональный параметр
+	if minPriceStr := c.QueryParam("min_price"); minPriceStr != "" {
+		if minPrice, err := strconv.ParseFloat(minPriceStr, 64); err == nil {
+			req.MinPrice = &minPrice
+		}
+	}
+
+	// MaxPrice - опциональный параметр
+	if maxPriceStr := c.QueryParam("max_price"); maxPriceStr != "" {
+		if maxPrice, err := strconv.ParseFloat(maxPriceStr, 64); err == nil {
+			req.MaxPrice = &maxPrice
+		}
+	}
+
+	// BrandId - опциональный параметр
+	if brandIdStr := c.QueryParam("brand_id"); brandIdStr != "" {
+		if brandId, err := strconv.ParseInt(brandIdStr, 10, 64); err == nil {
+			req.BrandId = &brandId
+		}
+	}
+
+	// Term - опциональный параметр поиска
+	if term := c.QueryParam("term"); term != "" {
+		req.Term = &term
 	}
 
 	result, err := h.s.GetProducts(c.Request().Context(), &req)

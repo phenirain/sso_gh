@@ -18,28 +18,6 @@ func NewClientHandler(clientService pb.ClientServiceClient) *ClientHandler {
 	return &ClientHandler{s: clientService}
 }
 
-// RegisterClient - регистрация клиента
-// @Summary Register client
-// @Tags client
-// @Accept json
-// @Produce json
-// @Param request body any true "Client request"
-// @Success 200 {object} response.Response[api.ClientResponse]
-// @Router /client/register [post]
-func (h *ClientHandler) RegisterClient(c echo.Context) (err error) {
-	var req api.ClientRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
-	}
-
-	var result *api.ClientResponse
-	result, err = h.s.RegisterClient(c.Request().Context(), &req)
-	if err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка регистрации клиента", err.Error()))
-	}
-	return c.JSON(http.StatusOK, response.NewSuccessResponse(&result))
-}
-
 // FillClientProfile - заполнение профиля клиента
 // @Summary Fill client profile
 // @Tags client

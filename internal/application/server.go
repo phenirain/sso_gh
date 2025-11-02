@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/phenirain/sso/docs"
@@ -17,6 +18,9 @@ import (
 	clientProduct "github.com/phenirain/sso/internal/application/client/product"
 	manager "github.com/phenirain/sso/internal/application/manager"
 	"github.com/phenirain/sso/internal/config"
+	"github.com/phenirain/sso/internal/lib/jwt"
+	"github.com/phenirain/sso/internal/repository/user"
+	authService "github.com/phenirain/sso/internal/services/auth"
 	"github.com/phenirain/sso/pkg/echomiddleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	pbAdmin "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api/admin"
@@ -26,7 +30,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func SetupHTTPServer(cfg *config.Config, authService auth.AuthService, jwt echomiddleware.Jwt, log *slog.Logger) (*echo.Echo, error) {
+func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog.Logger) (*echo.Echo, error) {
 	e := echo.New()
 
 	e.Pre(middleware.RemoveTrailingSlash())
@@ -54,6 +58,8 @@ func SetupHTTPServer(cfg *config.Config, authService auth.AuthService, jwt echom
 	if err != nil {
 		log.Error("Failed to connect to admin gRPC server", slog.String("address", cfg.GRPC.Admin), slog.String("error", err.Error()))
 		return nil, err
+	} else {
+		log.Info("Connected to admin gRPC server", slog.String("address", cfg.GRPC.Admin))
 	}
 
 	adminClientService := pbAdmin.NewClientServiceClient(adminConn)
@@ -66,6 +72,8 @@ func SetupHTTPServer(cfg *config.Config, authService auth.AuthService, jwt echom
 	if err != nil {
 		log.Error("Failed to connect to client gRPC server", slog.String("address", cfg.GRPC.Client), slog.String("error", err.Error()))
 		return nil, err
+	} else {
+		log.Info("Connected to client gRPC server", slog.String("address", cfg.GRPC.Client))
 	}
 
 	clientClientService := pbClient.NewClientServiceClient(clientConn)
@@ -77,12 +85,16 @@ func SetupHTTPServer(cfg *config.Config, authService auth.AuthService, jwt echom
 	if err != nil {
 		log.Error("Failed to connect to manager gRPC server", slog.String("address", cfg.GRPC.Manager), slog.String("error", err.Error()))
 		return nil, err
+	} else {
+		log.Info("Connected to manager gRPC server", slog.String("address", cfg.GRPC.Manager))
 	}
 
 	managerManagerService := pbManager.NewManagerServiceClient(managerConn)
 
 	log.Info("gRPC clients initialized successfully")
 
+	usersRepository := user.New(db)
+	authService := authService.New(usersRepository, jwt, clientClientService)
 	registerAuthRoutes(e, authService)
 	registerAdminRoutes(e, adminClientService, adminProductService, adminOrderService, adminReportService)
 	registerClientRoutes(e, clientClientService, clientProductService, clientOrderService)
@@ -106,7 +118,7 @@ func registerAdminRoutes(
 	orderService pbAdmin.OrderServiceClient,
 	reportService pbAdmin.ReportServiceClient,
 ) {
-	adminGroup := e.Group("/admin")
+	adminGroup := e.Group("/admin", echomiddleware.RoleMiddleware(echomiddleware.RoleAdmin))
 
 	// Product routes
 	productHandler := adminProduct.NewProductHandler(productService)
@@ -154,11 +166,10 @@ func registerClientRoutes(
 	productServiceClient pbClient.ProductServiceClient,
 	orderServiceClient pbClient.OrderServiceClient,
 ) {
-	clientGroup := e.Group("/client")
+	clientGroup := e.Group("/client", echomiddleware.RoleMiddleware(echomiddleware.RoleClient))
 
 	// Client profile routes
 	cHandler := clientClient.NewClientHandler(clientServiceClient)
-	clientGroup.POST("/register", cHandler.RegisterClient)
 	clientGroup.POST("/profile", cHandler.FillClientProfile)
 	clientGroup.GET("/profile/:id", cHandler.GetClientProfile)
 	clientGroup.DELETE(":id", cHandler.DeleteClient)
@@ -167,7 +178,7 @@ func registerClientRoutes(
 	pHandler := clientProduct.NewProductHandler(productServiceClient)
 	productGroup := clientGroup.Group("/product")
 	productGroup.POST("/base-models", pHandler.GetAllBaseModels)
-	productGroup.POST("", pHandler.GetProducts)
+	productGroup.GET("", pHandler.GetProducts)
 	productGroup.GET(":article", pHandler.GetProduct)
 	productGroup.POST("/favorites", pHandler.ActionProductToFavorites)
 	productGroup.GET(":id/favorites", pHandler.GetFavoriteProducts)
@@ -187,7 +198,7 @@ func registerClientRoutes(
 }
 
 func registerManagerRoutes(e *echo.Echo, managerServiceClient pbManager.ManagerServiceClient) {
-	managerGroup := e.Group("/manager")
+	managerGroup := e.Group("/manager", echomiddleware.RoleMiddleware(echomiddleware.RoleManager))
 
 	// Order routes
 	oHandler := manager.NewOrderHandler(managerServiceClient)
