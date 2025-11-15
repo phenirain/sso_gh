@@ -22,15 +22,17 @@ func NewProductHandler(productService pb.ProductServiceClient) *ProductHandler {
 // GetAllBaseModels - получить базовые модели
 // @Summary Get all base models
 // @Tags client-product
-// @Accept json
 // @Produce json
-// @Param request body any true "Get base models request"
+// @Param baseModelName query string false "Base model name"
 // @Success 200 {object} response.Response[api.BaseModelsResponse]
-// @Router /client/product/base-models [post]
+// @Security BearerAuth
+// @Router /client/product/base-models [get]
 func (h *ProductHandler) GetAllBaseModels(c echo.Context) error {
 	var req api.GetBaseModelsRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
+
+	baseModelName := c.QueryParam("baseModelName")
+	if baseModelName != "" {
+		req.BaseModel = baseModelName
 	}
 
 	result, err := h.s.GetAllBaseModels(c.Request().Context(), &req)
@@ -51,6 +53,7 @@ func (h *ProductHandler) GetAllBaseModels(c echo.Context) error {
 // @Param brand_id query int false "Brand ID"
 // @Param term query string false "Search term (article, name, brand)"
 // @Success 200 {object} response.Response[api.ProductsResponse]
+// @Security BearerAuth
 // @Router /client/product [get]
 func (h *ProductHandler) GetProducts(c echo.Context) error {
 	req := msg.GetProductsRequest{}
@@ -117,6 +120,7 @@ func (h *ProductHandler) GetProducts(c echo.Context) error {
 // @Produce json
 // @Param article path string true "Product article"
 // @Success 200 {object} response.Response[api.ExtendedProductResponse]
+// @Security BearerAuth
 // @Router /client/product/{article} [get]
 func (h *ProductHandler) GetProduct(c echo.Context) error {
 	var req api.ProductArticleRequest
@@ -132,16 +136,15 @@ func (h *ProductHandler) GetProduct(c echo.Context) error {
 // ActionProductToFavorites - действие с избранным
 // @Summary Action product to favorites
 // @Tags client-product
-// @Accept json
 // @Produce json
-// @Param request body any true "Product into favorites request"
+// @Param article path string true "Product article"
 // @Success 200 {object} response.Response[string]
-// @Router /client/product/favorites [post]
+// @Security BearerAuth
+// @Router /client/product/{article}/favorites [post]
 func (h *ProductHandler) ActionProductToFavorites(c echo.Context) error {
+	article := c.Param("article")
 	var req msg.ProductIntoFavoritesRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
-	}
+	req.Article = article
 
 	_, err := h.s.ActionProductToFavorites(c.Request().Context(), &req)
 	if err != nil {
@@ -156,15 +159,12 @@ func (h *ProductHandler) ActionProductToFavorites(c echo.Context) error {
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {object} response.Response[api.ProductsResponse]
-// @Router /client/product/{id}/favorites [get]
+// @Security BearerAuth
+// @Router /client/product/favorites [get]
 func (h *ProductHandler) GetFavoriteProducts(c echo.Context) error {
-	var req api.ActionByIdRequest
-	if parsed, errConv := strconv.ParseInt(c.Param("id"), 10, 64); errConv == nil {
-		req.Id = parsed
-	} else {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Некорректный идентификатор", errConv.Error()))
+	var req api.ActionByIdRequest = api.ActionByIdRequest{
+		Id: 0,
 	}
-
 	result, err := h.s.GetFavoriteProducts(c.Request().Context(), &req)
 	if err != nil {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка получения избранных продуктов", err.Error()))

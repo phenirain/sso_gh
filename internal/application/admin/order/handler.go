@@ -27,6 +27,7 @@ func NewOrderHandler(orderService pb.OrderServiceClient) *OrderHandler {
 // @Tags admin-order
 // @Produce json
 // @Success 200 {object} response.Response[order.OrderStatusesResponse]
+// @Security BearerAuth
 // @Router /admin/order/statuses [get]
 func (h *OrderHandler) GetOrderStatuses(c echo.Context) (err error) {
 	var result *order.OrderStatusesResponse
@@ -43,6 +44,7 @@ func (h *OrderHandler) GetOrderStatuses(c echo.Context) (err error) {
 // @Tags admin-order
 // @Produce json
 // @Success 200 {object} response.Response[order.OrderClientsResponse]
+// @Security BearerAuth
 // @Router /admin/order/clients [get]
 func (h *OrderHandler) GetOrderClients(c echo.Context) error {
 	result, err := h.s.GetClients(c.Request().Context(), &emptypb.Empty{})
@@ -58,6 +60,7 @@ func (h *OrderHandler) GetOrderClients(c echo.Context) error {
 // @Tags admin-order
 // @Produce json
 // @Success 200 {object} response.Response[order.OrderProductsResponse]
+// @Security BearerAuth
 // @Router /admin/order/products [get]
 func (h *OrderHandler) GetOrderProducts(c echo.Context) error {
 	result, err := h.s.GetProducts(c.Request().Context(), &emptypb.Empty{})
@@ -75,6 +78,7 @@ func (h *OrderHandler) GetOrderProducts(c echo.Context) error {
 // @Produce json
 // @Param request body order.OrderRequest true "Order request"
 // @Success 200 {object} response.Response[api.ExtendedOrderResponse]
+// @Security BearerAuth
 // @Router /admin/order [post]
 func (h *OrderHandler) CreateOrUpdateOrder(c echo.Context) (err error) {
 	var req order.OrderRequest
@@ -94,16 +98,20 @@ func (h *OrderHandler) CreateOrUpdateOrder(c echo.Context) (err error) {
 // GetOrders - получение списка заказов
 // @Summary Get orders
 // @Tags admin-order
-// @Accept json
 // @Produce json
-// @Param request body order.GetOrdersRequest true "Get orders request"
+// @Param statusId path int true "Status ID"
 // @Success 200 {object} response.Response[api.OrdersResponse]
-// @Router /admin/orders [post]
+// @Security BearerAuth
+// @Router /admin/orders/status/{statusId} [get]
 func (h *OrderHandler) GetOrders(c echo.Context) (err error) {
 	var req order.GetOrdersRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
+
+	statusIdStr := c.Param("statusId")
+	statusId, errConv := strconv.ParseInt(statusIdStr, 10, 64)
+	if errConv != nil {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Некорректный statusId", errConv.Error()))
 	}
+	req.StatusId = statusId
 
 	var result *api.OrdersResponse
 	result, err = h.s.GetOrders(c.Request().Context(), &req)
@@ -120,6 +128,7 @@ func (h *OrderHandler) GetOrders(c echo.Context) (err error) {
 // @Produce json
 // @Param id path int true "Order ID"
 // @Success 200 {object} response.Response[api.ExtendedOrderResponse]
+// @Security BearerAuth
 // @Router /admin/order/{id} [get]
 func (h *OrderHandler) GetOrderById(c echo.Context) error {
 	id := c.Param("id")
@@ -144,6 +153,7 @@ func (h *OrderHandler) GetOrderById(c echo.Context) error {
 // @Produce json
 // @Param id path int true "Order ID"
 // @Success 200 {object} response.Response[string]
+// @Security BearerAuth
 // @Router /admin/order/{id} [delete]
 func (h *OrderHandler) DeleteOrder(c echo.Context) error {
 	id := c.Param("id")

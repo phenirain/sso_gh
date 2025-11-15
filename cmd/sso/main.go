@@ -4,6 +4,10 @@ package main
 // @version 1.0
 // @description SSO service API.
 // @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter your JWT token in the format: Bearer {token}
 import (
 	"log/slog"
 	"os"

@@ -27,6 +27,7 @@ func JwtValidation(jwt Jwt) echo.MiddlewareFunc {
 		"/health":       {},
 		"/swagger/*":    {},
 		"/v":            {},
+		"/metrics":      {},
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {

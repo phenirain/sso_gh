@@ -49,8 +49,12 @@ func SlogLoggerMiddleware(logger logger) echo.MiddlewareFunc {
 			// attrs = append(attrs, slog.String(string(contextkeys.RequestIDCtxKey), reqID))
 			// traceID := getTraceID(v.Headers)
 			// attrs = append(attrs, slog.String(string(contextkeys.TraceIDCtxKey), traceID))
-			userID := c.Get(string(contextkeys.UserIDCtxKey))
-			attrs = append(attrs, slog.String(string(contextkeys.UserIDCtxKey), userID.(string)))
+			userID := c.Request().Context().Value(contextkeys.UserIDCtxKey)
+			if userID != nil {
+				if uid, ok := userID.(int64); ok {
+					attrs = append(attrs, slog.Int64(string(contextkeys.UserIDCtxKey), uid))
+				}
+			}
 
 			respErrStr := "?"
 			if v.Error != nil {

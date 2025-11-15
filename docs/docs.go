@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/admin/client": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -34,6 +39,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -65,8 +75,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/client/roles": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-client"
+                ],
+                "summary": "Get user roles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_RolesResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/client/user": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-client"
+                ],
+                "summary": "Create or update user",
+                "parameters": [
+                    {
+                        "description": "User request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.UserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_UserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/client/user/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-client"
+                ],
+                "summary": "Delete user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/client/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -86,6 +196,11 @@ const docTemplate = `{
         },
         "/admin/client/{id}": {
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -114,6 +229,11 @@ const docTemplate = `{
         },
         "/admin/order": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -147,6 +267,11 @@ const docTemplate = `{
         },
         "/admin/order/clients": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -166,6 +291,11 @@ const docTemplate = `{
         },
         "/admin/order/products": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -185,6 +315,11 @@ const docTemplate = `{
         },
         "/admin/order/statuses": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -204,6 +339,11 @@ const docTemplate = `{
         },
         "/admin/order/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -230,6 +370,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -256,10 +401,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/orders": {
-            "post": {
-                "consumes": [
-                    "application/json"
+        "/admin/orders/status/{statusId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "produces": [
                     "application/json"
@@ -270,13 +417,11 @@ const docTemplate = `{
                 "summary": "Get orders",
                 "parameters": [
                     {
-                        "description": "Get orders request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/order.GetOrdersRequest"
-                        }
+                        "type": "integer",
+                        "description": "Status ID",
+                        "name": "statusId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -291,6 +436,11 @@ const docTemplate = `{
         },
         "/admin/product": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -308,8 +458,13 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -320,13 +475,82 @@ const docTemplate = `{
                 "summary": "Create or update product",
                 "parameters": [
                     {
-                        "description": "Product request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/product.ProductRequest"
-                        }
+                        "type": "string",
+                        "description": "Product article",
+                        "name": "article",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Old article",
+                        "name": "article_old",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product name",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product description",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Product price",
+                        "name": "price",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Product quantity",
+                        "name": "quantity",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Brand ID",
+                        "name": "brand_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Product type ID",
+                        "name": "product_type_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Texture ID",
+                        "name": "texture_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Volume",
+                        "name": "volume",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Volume ID",
+                        "name": "volume_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Is archived",
+                        "name": "is_archived",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Product image",
+                        "name": "image",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -341,6 +565,11 @@ const docTemplate = `{
         },
         "/admin/product/base-model": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -370,10 +599,14 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/admin/product/base-model/{baseModelName}/{id}": {
             "delete": {
-                "consumes": [
-                    "application/json"
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "produces": [
                     "application/json"
@@ -384,13 +617,18 @@ const docTemplate = `{
                 "summary": "Delete base model",
                 "parameters": [
                     {
-                        "description": "Delete base model request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/product.DeleteBaseModelRequest"
-                        }
+                        "type": "string",
+                        "description": "Base model name",
+                        "name": "baseModelName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Base model ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -403,10 +641,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/product/base-models": {
-            "post": {
-                "consumes": [
-                    "application/json"
+        "/admin/product/base-models/{baseModelName}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "produces": [
                     "application/json"
@@ -417,13 +657,11 @@ const docTemplate = `{
                 "summary": "Get all base models",
                 "parameters": [
                     {
-                        "description": "Get base models request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.GetBaseModelsRequest"
-                        }
+                        "type": "string",
+                        "description": "Base model name",
+                        "name": "baseModelName",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -438,6 +676,11 @@ const docTemplate = `{
         },
         "/admin/product/{article}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -464,6 +707,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -490,10 +738,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/report/average-processing-time": {
-            "post": {
-                "consumes": [
-                    "application/json"
+        "/admin/report/average-processing-time/{period}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "produces": [
                     "application/json"
@@ -504,13 +754,18 @@ const docTemplate = `{
                 "summary": "Get average order processing time",
                 "parameters": [
                     {
-                        "description": "Report request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/report.ReportRequest"
-                        }
+                        "enum": [
+                            "today",
+                            "yesterday",
+                            "week",
+                            "month",
+                            "year"
+                        ],
+                        "type": "string",
+                        "description": "Period (today, yesterday, week, month, year)",
+                        "name": "period",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -523,10 +778,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/report/orders-by-time": {
-            "post": {
-                "consumes": [
-                    "application/json"
+        "/admin/report/orders-by-time/{period}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "produces": [
                     "application/json"
@@ -537,13 +794,18 @@ const docTemplate = `{
                 "summary": "Get amount of orders by time of day",
                 "parameters": [
                     {
-                        "description": "Report request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/report.ReportRequest"
-                        }
+                        "enum": [
+                            "today",
+                            "yesterday",
+                            "week",
+                            "month",
+                            "year"
+                        ],
+                        "type": "string",
+                        "description": "Period (today, yesterday, week, month, year)",
+                        "name": "period",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -556,10 +818,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/report/purchases-by-brands": {
-            "post": {
-                "consumes": [
-                    "application/json"
+        "/admin/report/purchases-by-brands/{period}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "produces": [
                     "application/json"
@@ -570,13 +834,18 @@ const docTemplate = `{
                 "summary": "Get purchases by brands",
                 "parameters": [
                     {
-                        "description": "Report request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/report.ReportRequest"
-                        }
+                        "enum": [
+                            "today",
+                            "yesterday",
+                            "week",
+                            "month",
+                            "year"
+                        ],
+                        "type": "string",
+                        "description": "Period (today, yesterday, week, month, year)",
+                        "name": "period",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -676,6 +945,11 @@ const docTemplate = `{
         },
         "/client/order": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -693,6 +967,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -726,6 +1005,11 @@ const docTemplate = `{
         },
         "/client/order/add-product": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -757,41 +1041,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/client/order/complete": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "client-order"
-                ],
-                "summary": "Complete order",
-                "parameters": [
-                    {
-                        "description": "Complete order request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
-                        }
-                    }
-                }
-            }
-        },
         "/client/order/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -820,6 +1076,11 @@ const docTemplate = `{
         },
         "/client/order/{id}/cancel": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -846,8 +1107,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/client/order/{id}/complete": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-order"
+                ],
+                "summary": "Complete order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
         "/client/product": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -906,9 +1205,11 @@ const docTemplate = `{
             }
         },
         "/client/product/base-models": {
-            "post": {
-                "consumes": [
-                    "application/json"
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "produces": [
                     "application/json"
@@ -919,13 +1220,10 @@ const docTemplate = `{
                 "summary": "Get all base models",
                 "parameters": [
                     {
-                        "description": "Get base models request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
+                        "type": "string",
+                        "description": "Base model name",
+                        "name": "baseModelName",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -939,68 +1237,12 @@ const docTemplate = `{
             }
         },
         "/client/product/favorites": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "client-product"
-                ],
-                "summary": "Action product to favorites",
-                "parameters": [
-                    {
-                        "description": "Product into favorites request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
-                        }
-                    }
-                }
-            }
-        },
-        "/client/product/{article}": {
             "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "client-product"
-                ],
-                "summary": "Get product",
-                "parameters": [
+                "security": [
                     {
-                        "type": "string",
-                        "description": "Product article",
-                        "name": "article",
-                        "in": "path",
-                        "required": true
+                        "BearerAuth": []
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/client/product/{id}/favorites": {
-            "get": {
                 "produces": [
                     "application/json"
                 ],
@@ -1027,8 +1269,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/client/product/{article}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-product"
+                ],
+                "summary": "Get product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product article",
+                        "name": "article",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/client/product/{article}/favorites": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client-product"
+                ],
+                "summary": "Action product to favorites",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product article",
+                        "name": "article",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string"
+                        }
+                    }
+                }
+            }
+        },
         "/client/profile": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1062,6 +1375,11 @@ const docTemplate = `{
         },
         "/client/profile/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1090,6 +1408,11 @@ const docTemplate = `{
         },
         "/client/{id}": {
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1118,6 +1441,11 @@ const docTemplate = `{
         },
         "/manager/order": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1137,6 +1465,11 @@ const docTemplate = `{
         },
         "/manager/order/give": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1170,6 +1503,11 @@ const docTemplate = `{
         },
         "/manager/order/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1198,6 +1536,11 @@ const docTemplate = `{
         },
         "/manager/order/{id}/cancel": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1326,6 +1669,9 @@ const docTemplate = `{
                 "brand": {
                     "type": "string"
                 },
+                "brand_id": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -1335,22 +1681,23 @@ const docTemplate = `{
                 "product_type": {
                     "type": "string"
                 },
+                "product_type_id": {
+                    "type": "integer"
+                },
                 "texture": {
                     "type": "string"
+                },
+                "texture_id": {
+                    "type": "integer"
                 },
                 "volume": {
                     "type": "integer"
                 },
                 "volume_type": {
                     "type": "string"
-                }
-            }
-        },
-        "api.GetBaseModelsRequest": {
-            "type": "object",
-            "properties": {
-                "base_model": {
-                    "type": "string"
+                },
+                "volume_type_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1473,19 +1820,8 @@ const docTemplate = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/client.ClientUsersResponse_User"
+                        "$ref": "#/definitions/client.UserResponse"
                     }
-                }
-            }
-        },
-        "client.ClientUsersResponse_User": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "login": {
-                    "type": "string"
                 }
             }
         },
@@ -1497,6 +1833,62 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/api.ClientResponse"
                     }
+                }
+            }
+        },
+        "client.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "role_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.RolesResponse": {
+            "type": "object",
+            "properties": {
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/client.RoleResponse"
+                    }
+                }
+            }
+        },
+        "client.UserRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "is_archived": {
+                    "type": "boolean"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.UserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/client.RoleResponse"
                 }
             }
         },
@@ -1753,6 +2145,56 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_phenirain_sso_internal_dto_response.Response-client_RolesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/client.RolesResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_phenirain_sso_internal_dto_response.Response-client_UserResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/client.UserResponse"
+                        }
+                    ]
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
         "github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse": {
             "type": "object",
             "properties": {
@@ -1989,14 +2431,6 @@ const docTemplate = `{
                 }
             }
         },
-        "order.GetOrdersRequest": {
-            "type": "object",
-            "properties": {
-                "status_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "order.OrderClientsResponse": {
             "type": "object",
             "properties": {
@@ -2073,64 +2507,6 @@ const docTemplate = `{
                 }
             }
         },
-        "product.DeleteBaseModelRequest": {
-            "type": "object",
-            "properties": {
-                "base_model": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "product.ProductRequest": {
-            "type": "object",
-            "properties": {
-                "article": {
-                    "type": "string"
-                },
-                "article_old": {
-                    "type": "string"
-                },
-                "brand_id": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "is_archived": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "product_type_id": {
-                    "type": "integer"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "texture_id": {
-                    "type": "integer"
-                },
-                "volume": {
-                    "type": "integer"
-                },
-                "volume_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "report.AverageOrderProcessingTimeResponse": {
             "type": "object",
             "properties": {
@@ -2196,15 +2572,14 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "report.ReportRequest": {
-            "type": "object",
-            "properties": {
-                "period": {
-                    "description": "период: сегодня, вчера, неделя, месяц, год",
-                    "type": "string"
-                }
-            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Enter your JWT token in the format: Bearer {token}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

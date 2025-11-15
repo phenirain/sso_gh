@@ -25,6 +25,7 @@ func NewClientHandler(clientService pb.ClientServiceClient) *ClientHandler {
 // @Produce json
 // @Param request body any true "Client request"
 // @Success 200 {object} response.Response[api.ClientResponse]
+// @Security BearerAuth
 // @Router /client/profile [post]
 func (h *ClientHandler) FillClientProfile(c echo.Context) (err error) {
 	var req api.ClientRequest
@@ -46,6 +47,7 @@ func (h *ClientHandler) FillClientProfile(c echo.Context) (err error) {
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {object} response.Response[api.ClientResponse]
+// @Security BearerAuth
 // @Router /client/profile/{id} [get]
 func (h *ClientHandler) GetClientProfile(c echo.Context) (err error) {
 	var req api.ActionByIdRequest
@@ -69,6 +71,7 @@ func (h *ClientHandler) GetClientProfile(c echo.Context) (err error) {
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {object} response.Response[string]
+// @Security BearerAuth
 // @Router /client/{id} [delete]
 func (h *ClientHandler) DeleteClient(c echo.Context) (err error) {
 	id := c.Param("id")

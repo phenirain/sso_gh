@@ -22,6 +22,9 @@ import (
 	"github.com/phenirain/sso/internal/repository/user"
 	authService "github.com/phenirain/sso/internal/services/auth"
 	"github.com/phenirain/sso/pkg/echomiddleware"
+	grpcpkg "github.com/phenirain/sso/pkg/grpc"
+	"github.com/phenirain/sso/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	pbAdmin "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api/admin"
 	pbClient "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/proto/generated/api/client"
@@ -30,16 +33,24 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog.Logger) (*echo.Echo, error) {
+func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog.Logger) (*echo.Echo, *metrics.Metrics, error) {
 	e := echo.New()
 
+	// Initialize metrics
+	m := metrics.New()
+
 	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(echomiddleware.JwtValidation(jwt))
 	e.Use(middleware.Recover())
+	e.Use(echomiddleware.JwtValidation(jwt))
+	e.Use(echomiddleware.SlogLoggerMiddleware(log))
+	e.Use(echomiddleware.MetricsMiddleware(m)) // Add metrics middleware
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: cfg.AllowedOrigins,
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
+
+	// Prometheus metrics endpoint
+	e.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 
 	// Swagger UI endpoint
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -54,10 +65,14 @@ func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog
 	// Создание gRPC клиентов
 
 	// Admin gRPC клиенты
-	adminConn, err := grpc.NewClient(cfg.GRPC.Admin, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	adminConn, err := grpc.NewClient(
+		cfg.GRPC.Admin,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(grpcpkg.UserIDInterceptor()),
+	)
 	if err != nil {
 		log.Error("Failed to connect to admin gRPC server", slog.String("address", cfg.GRPC.Admin), slog.String("error", err.Error()))
-		return nil, err
+		return nil, nil, err
 	} else {
 		log.Info("Connected to admin gRPC server", slog.String("address", cfg.GRPC.Admin))
 	}
@@ -68,10 +83,14 @@ func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog
 	adminReportService := pbAdmin.NewReportServiceClient(adminConn)
 
 	// Client gRPC клиенты
-	clientConn, err := grpc.NewClient(cfg.GRPC.Client, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	clientConn, err := grpc.NewClient(
+		cfg.GRPC.Client,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(grpcpkg.UserIDInterceptor()),
+	)
 	if err != nil {
 		log.Error("Failed to connect to client gRPC server", slog.String("address", cfg.GRPC.Client), slog.String("error", err.Error()))
-		return nil, err
+		return nil, nil, err
 	} else {
 		log.Info("Connected to client gRPC server", slog.String("address", cfg.GRPC.Client))
 	}
@@ -81,10 +100,14 @@ func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog
 	clientOrderService := pbClient.NewOrderServiceClient(clientConn)
 
 	// Manager gRPC клиенты
-	managerConn, err := grpc.NewClient(cfg.GRPC.Manager, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	managerConn, err := grpc.NewClient(
+		cfg.GRPC.Manager,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(grpcpkg.UserIDInterceptor()),
+	)
 	if err != nil {
 		log.Error("Failed to connect to manager gRPC server", slog.String("address", cfg.GRPC.Manager), slog.String("error", err.Error()))
-		return nil, err
+		return nil, nil, err
 	} else {
 		log.Info("Connected to manager gRPC server", slog.String("address", cfg.GRPC.Manager))
 	}
@@ -95,16 +118,16 @@ func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog
 
 	usersRepository := user.New(db)
 	authService := authService.New(usersRepository, jwt, clientClientService)
-	registerAuthRoutes(e, authService)
+	registerAuthRoutes(e, authService, m)
 	registerAdminRoutes(e, adminClientService, adminProductService, adminOrderService, adminReportService)
 	registerClientRoutes(e, clientClientService, clientProductService, clientOrderService)
 	registerManagerRoutes(e, managerManagerService)
 
-	return e, nil
+	return e, m, nil
 }
 
-func registerAuthRoutes(e *echo.Echo, authService auth.AuthService) {
-	authHandler := auth.NewHandler(authService)
+func registerAuthRoutes(e *echo.Echo, authService auth.AuthService, m *metrics.Metrics) {
+	authHandler := auth.NewHandler(authService, m)
 	auth := e.Group("/auth")
 	auth.POST("/logIn", authHandler.LogIn)
 	auth.POST("/signUp", authHandler.SignUp)
@@ -124,12 +147,12 @@ func registerAdminRoutes(
 	productHandler := adminProduct.NewProductHandler(productService)
 	productGroup := adminGroup.Group("/product")
 	productGroup.POST("/base-model", productHandler.CreateOrUpdateBaseModel)
-	productGroup.POST("/base-models", productHandler.GetAllBaseModels)
-	productGroup.DELETE("/base-model", productHandler.DeleteBaseModel)
+	productGroup.GET("/base-models/:baseModelName", productHandler.GetAllBaseModels)
+	productGroup.DELETE("/base-model/:baseModelName/:id", productHandler.DeleteBaseModel)
 	productGroup.POST("", productHandler.CreateOrUpdateProduct)
-	productGroup.GET(":article", productHandler.GetProductByArticle)
+	productGroup.GET("/:article", productHandler.GetProductByArticle)
 	productGroup.GET("", productHandler.GetProducts)
-	productGroup.DELETE(":article", productHandler.DeleteProduct)
+	productGroup.DELETE("/:article", productHandler.DeleteProduct)
 
 	// Order routes
 	orderHandler := adminOrder.NewOrderHandler(orderService)
@@ -137,27 +160,31 @@ func registerAdminRoutes(
 	orderGroup.GET("/statuses", orderHandler.GetOrderStatuses)
 	orderGroup.GET("/clients", orderHandler.GetOrderClients)
 	orderGroup.GET("/products", orderHandler.GetOrderProducts)
+	orderGroup.GET("/status/:statusId", orderHandler.GetOrders)
 	orderGroup.POST("", orderHandler.CreateOrUpdateOrder)
-	orderGroup.GET(":id", orderHandler.GetOrderById)
-	orderGroup.DELETE(":id", orderHandler.DeleteOrder)
+	orderGroup.GET("/:id", orderHandler.GetOrderById)
+	orderGroup.DELETE("/:id", orderHandler.DeleteOrder)
 
 	// Client routes
 	clientHandler := adminClient.NewClientHandler(clientService)
 	clientGroup := adminGroup.Group("/client")
 	clientGroup.GET("/users", clientHandler.GetUsers)
+	clientGroup.GET("/roles", clientHandler.GetRoles)
+	clientGroup.POST("/user", clientHandler.CreateOrUpdateUser)
+	clientGroup.DELETE("/user/:id", clientHandler.DeleteUser)
 	clientGroup.POST("", clientHandler.CreateClient)
 	clientGroup.GET("", clientHandler.GetClients)
-	clientGroup.DELETE(":id", clientHandler.DeleteClient)
+	clientGroup.DELETE("/:id", clientHandler.DeleteClient)
 
 	// Report routes
 	reportHandler := adminReport.NewReportHandler(reportService)
 	reportGroup := adminGroup.Group("/report")
-	reportGroup.POST("/orders-by-time", reportHandler.GetAmountOfOrdersByTimeOfDay)
-	reportGroup.POST("/purchases-by-brands", reportHandler.GetPurchasesByBrands)
-	reportGroup.POST("/average-processing-time", reportHandler.GetAverageOrderProcessingTime)
+	reportGroup.GET("/orders-by-time/:period", reportHandler.GetAmountOfOrdersByTimeOfDay)
+	reportGroup.GET("/purchases-by-brands/:period", reportHandler.GetPurchasesByBrands)
+	reportGroup.GET("/average-processing-time/:period", reportHandler.GetAverageOrderProcessingTime)
 
 	// Orders list route
-	adminGroup.POST("/orders", orderHandler.GetOrders)
+	adminGroup.GET("/orders/status/:statusId", orderHandler.GetOrders)
 }
 
 func registerClientRoutes(
@@ -172,26 +199,26 @@ func registerClientRoutes(
 	cHandler := clientClient.NewClientHandler(clientServiceClient)
 	clientGroup.POST("/profile", cHandler.FillClientProfile)
 	clientGroup.GET("/profile/:id", cHandler.GetClientProfile)
-	clientGroup.DELETE(":id", cHandler.DeleteClient)
+	clientGroup.DELETE("/:id", cHandler.DeleteClient)
 
 	// Product routes
 	pHandler := clientProduct.NewProductHandler(productServiceClient)
 	productGroup := clientGroup.Group("/product")
-	productGroup.POST("/base-models", pHandler.GetAllBaseModels)
+	productGroup.GET("/base-models", pHandler.GetAllBaseModels)
 	productGroup.GET("", pHandler.GetProducts)
-	productGroup.GET(":article", pHandler.GetProduct)
-	productGroup.POST("/favorites", pHandler.ActionProductToFavorites)
-	productGroup.GET(":id/favorites", pHandler.GetFavoriteProducts)
+	productGroup.GET("/:article", pHandler.GetProduct)
+	productGroup.POST("/:article/favorites", pHandler.ActionProductToFavorites)
+	productGroup.GET("/favorites", pHandler.GetFavoriteProducts)
 
 	// Order routes
 	oHandler := clientOrder.NewOrderHandler(orderServiceClient)
 	orderGroup := clientGroup.Group("/order")
 	orderGroup.POST("", oHandler.CreateOrder)
-	orderGroup.POST("/complete", oHandler.CompleteOrder)
+	orderGroup.POST("/:id/complete", oHandler.CompleteOrder)
 	orderGroup.POST("/add-product", oHandler.AddProductToOrder)
 	orderGroup.GET("", oHandler.GetClientOrders)
-	orderGroup.GET(":id", oHandler.GetOrderById)
-	orderGroup.POST(":id/cancel", oHandler.CancelOrder)
+	orderGroup.GET("/:id", oHandler.GetOrderById)
+	orderGroup.POST("/:id/cancel", oHandler.CancelOrder)
 
 	// Orders list route
 	clientGroup.GET("/orders", oHandler.GetClientOrders)
@@ -204,9 +231,9 @@ func registerManagerRoutes(e *echo.Echo, managerServiceClient pbManager.ManagerS
 	oHandler := manager.NewOrderHandler(managerServiceClient)
 	orderGroup := managerGroup.Group("/order")
 	orderGroup.GET("", oHandler.GetAllOrders)
-	orderGroup.GET(":id", oHandler.GetOrderById)
+	orderGroup.GET("/:id", oHandler.GetOrderById)
 	orderGroup.POST("/give", oHandler.GiveOrder)
-	orderGroup.POST(":id/cancel", oHandler.CancelOrder)
+	orderGroup.POST("/:id/cancel", oHandler.CancelOrder)
 
 	// Orders list route
 	managerGroup.GET("/orders", oHandler.GetAllOrders)

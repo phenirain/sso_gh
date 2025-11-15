@@ -27,6 +27,7 @@ func NewOrderHandler(orderService pb.OrderServiceClient) *OrderHandler {
 // @Produce json
 // @Param request body any true "Create order request"
 // @Success 200 {object} response.Response[msg.ClientOrderResponse]
+// @Security BearerAuth
 // @Router /client/order [post]
 func (h *OrderHandler) CreateOrder(c echo.Context) error {
 	var req msg.CreateOrderRequest
@@ -44,15 +45,18 @@ func (h *OrderHandler) CreateOrder(c echo.Context) error {
 // CompleteOrder - оформление заказа
 // @Summary Complete order
 // @Tags client-order
-// @Accept json
 // @Produce json
-// @Param request body any true "Complete order request"
+// @Param id path int true "Order ID"
 // @Success 200 {object} response.Response[string]
-// @Router /client/order/complete [post]
+// @Security BearerAuth
+// @Router /client/order/{id}/complete [post]
 func (h *OrderHandler) CompleteOrder(c echo.Context) error {
+	id := c.Param("id")
 	var req msg.CompleteOrderRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
+	if parsed, errConv := strconv.ParseInt(id, 10, 64); errConv == nil {
+		req.OrderId = parsed
+	} else {
+		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Некорректный идентификатор", errConv.Error()))
 	}
 
 	_, err := h.s.CompleteOrder(c.Request().Context(), &req)
@@ -69,6 +73,7 @@ func (h *OrderHandler) CompleteOrder(c echo.Context) error {
 // @Produce json
 // @Param request body any true "Product into order request"
 // @Success 200 {object} response.Response[msg.ClientOrderResponse]
+// @Security BearerAuth
 // @Router /client/order/add-product [post]
 func (h *OrderHandler) AddProductToOrder(c echo.Context) error {
 	var req msg.ProductIntoOrderRequest
@@ -88,6 +93,7 @@ func (h *OrderHandler) AddProductToOrder(c echo.Context) error {
 // @Tags client-order
 // @Produce json
 // @Success 200 {object} response.Response[pbApi.OrdersResponse]
+// @Security BearerAuth
 // @Router /client/order [get]
 func (h *OrderHandler) GetClientOrders(c echo.Context) error {
 	result, err := h.s.GetClientOrders(c.Request().Context(), &emptypb.Empty{})
@@ -103,6 +109,7 @@ func (h *OrderHandler) GetClientOrders(c echo.Context) error {
 // @Produce json
 // @Param id path int true "Order ID"
 // @Success 200 {object} response.Response[msg.ClientOrderResponse]
+// @Security BearerAuth
 // @Router /client/order/{id} [get]
 func (h *OrderHandler) GetOrderById(c echo.Context) error {
 	id := c.Param("id")
@@ -126,6 +133,7 @@ func (h *OrderHandler) GetOrderById(c echo.Context) error {
 // @Produce json
 // @Param id path int true "Order ID"
 // @Success 200 {object} response.Response[string]
+// @Security BearerAuth
 // @Router /client/order/{id}/cancel [post]
 func (h *OrderHandler) CancelOrder(c echo.Context) error {
 	id := c.Param("id")

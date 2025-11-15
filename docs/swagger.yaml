@@ -65,23 +65,26 @@ definitions:
     properties:
       brand:
         type: string
+      brand_id:
+        type: integer
       description:
         type: string
       product_type:
         type: string
+      product_type_id:
+        type: integer
       productInfo:
         $ref: '#/definitions/api.ProductResponse'
       texture:
         type: string
+      texture_id:
+        type: integer
       volume:
         type: integer
       volume_type:
         type: string
-    type: object
-  api.GetBaseModelsRequest:
-    properties:
-      base_model:
-        type: string
+      volume_type_id:
+        type: integer
     type: object
   api.OrderClient:
     properties:
@@ -160,15 +163,8 @@ definitions:
     properties:
       users:
         items:
-          $ref: '#/definitions/client.ClientUsersResponse_User'
+          $ref: '#/definitions/client.UserResponse'
         type: array
-    type: object
-  client.ClientUsersResponse_User:
-    properties:
-      id:
-        type: integer
-      login:
-        type: string
     type: object
   client.ClientsResponse:
     properties:
@@ -176,6 +172,42 @@ definitions:
         items:
           $ref: '#/definitions/api.ClientResponse'
         type: array
+    type: object
+  client.RoleResponse:
+    properties:
+      id:
+        type: integer
+      role_name:
+        type: string
+    type: object
+  client.RolesResponse:
+    properties:
+      roles:
+        items:
+          $ref: '#/definitions/client.RoleResponse'
+        type: array
+    type: object
+  client.UserRequest:
+    properties:
+      id:
+        type: integer
+      is_archived:
+        type: boolean
+      login:
+        type: string
+      password:
+        type: string
+      role_id:
+        type: integer
+    type: object
+  client.UserResponse:
+    properties:
+      id:
+        type: integer
+      login:
+        type: string
+      role:
+        $ref: '#/definitions/client.RoleResponse'
     type: object
   github_com_phenirain_sso_internal_dto_auth.AuthRequest:
     properties:
@@ -341,6 +373,38 @@ definitions:
         description: Статус ответа
         type: boolean
     type: object
+  github_com_phenirain_sso_internal_dto_response.Response-client_RolesResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/client.RolesResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
+  github_com_phenirain_sso_internal_dto_response.Response-client_UserResponse:
+    properties:
+      data:
+        allOf:
+        - $ref: '#/definitions/client.UserResponse'
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
   github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse:
     properties:
       data:
@@ -494,11 +558,6 @@ definitions:
       total_amount:
         type: number
     type: object
-  order.GetOrdersRequest:
-    properties:
-      status_id:
-        type: integer
-    type: object
   order.OrderClientsResponse:
     properties:
       clients:
@@ -548,44 +607,6 @@ definitions:
       name:
         type: string
     type: object
-  product.DeleteBaseModelRequest:
-    properties:
-      base_model:
-        type: string
-      id:
-        type: integer
-    type: object
-  product.ProductRequest:
-    properties:
-      article:
-        type: string
-      article_old:
-        type: string
-      brand_id:
-        type: integer
-      description:
-        type: string
-      image:
-        items:
-          type: integer
-        type: array
-      is_archived:
-        type: boolean
-      name:
-        type: string
-      price:
-        type: number
-      product_type_id:
-        type: integer
-      quantity:
-        type: integer
-      texture_id:
-        type: integer
-      volume:
-        type: integer
-      volume_id:
-        type: integer
-    type: object
   report.AverageOrderProcessingTimeResponse:
     properties:
       units:
@@ -628,12 +649,6 @@ definitions:
       purchase_count:
         type: integer
     type: object
-  report.ReportRequest:
-    properties:
-      period:
-        description: 'период: сегодня, вчера, неделя, месяц, год'
-        type: string
-    type: object
 info:
   contact: {}
   description: SSO service API.
@@ -649,6 +664,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_ClientsResponse'
+      security:
+      - BearerAuth: []
       summary: Get all clients
       tags:
       - admin-client
@@ -669,6 +686,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse'
+      security:
+      - BearerAuth: []
       summary: Create client
       tags:
       - admin-client
@@ -687,7 +706,66 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
       summary: Delete client
+      tags:
+      - admin-client
+  /admin/client/roles:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_RolesResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user roles
+      tags:
+      - admin-client
+  /admin/client/user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_UserResponse'
+      security:
+      - BearerAuth: []
+      summary: Create or update user
+      tags:
+      - admin-client
+  /admin/client/user/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
+      summary: Delete user
       tags:
       - admin-client
   /admin/client/users:
@@ -699,6 +777,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-client_ClientUsersResponse'
+      security:
+      - BearerAuth: []
       summary: Get users
       tags:
       - admin-client
@@ -720,6 +800,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse'
+      security:
+      - BearerAuth: []
       summary: Create or update order
       tags:
       - admin-order
@@ -738,6 +820,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
       summary: Delete order
       tags:
       - admin-order
@@ -755,6 +839,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse'
+      security:
+      - BearerAuth: []
       summary: Get order by ID
       tags:
       - admin-order
@@ -767,6 +853,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderClientsResponse'
+      security:
+      - BearerAuth: []
       summary: Get order clients
       tags:
       - admin-order
@@ -779,6 +867,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderProductsResponse'
+      security:
+      - BearerAuth: []
       summary: Get order products
       tags:
       - admin-order
@@ -791,20 +881,19 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_OrderStatusesResponse'
+      security:
+      - BearerAuth: []
       summary: Get order statuses
       tags:
       - admin-order
-  /admin/orders:
-    post:
-      consumes:
-      - application/json
+  /admin/orders/status/{statusId}:
+    get:
       parameters:
-      - description: Get orders request
-        in: body
-        name: request
+      - description: Status ID
+        in: path
+        name: statusId
         required: true
-        schema:
-          $ref: '#/definitions/order.GetOrdersRequest'
+        type: integer
       produces:
       - application/json
       responses:
@@ -812,6 +901,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse'
+      security:
+      - BearerAuth: []
       summary: Get orders
       tags:
       - admin-order
@@ -824,19 +915,67 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse'
+      security:
+      - BearerAuth: []
       summary: Get all products
       tags:
       - admin-product
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       parameters:
-      - description: Product request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/product.ProductRequest'
+      - description: Product article
+        in: formData
+        name: article
+        type: string
+      - description: Old article
+        in: formData
+        name: article_old
+        type: string
+      - description: Product name
+        in: formData
+        name: name
+        type: string
+      - description: Product description
+        in: formData
+        name: description
+        type: string
+      - description: Product price
+        in: formData
+        name: price
+        type: number
+      - description: Product quantity
+        in: formData
+        name: quantity
+        type: integer
+      - description: Brand ID
+        in: formData
+        name: brand_id
+        type: integer
+      - description: Product type ID
+        in: formData
+        name: product_type_id
+        type: integer
+      - description: Texture ID
+        in: formData
+        name: texture_id
+        type: integer
+      - description: Volume
+        in: formData
+        name: volume
+        type: integer
+      - description: Volume ID
+        in: formData
+        name: volume_id
+        type: integer
+      - description: Is archived
+        in: formData
+        name: is_archived
+        type: boolean
+      - description: Product image
+        in: formData
+        name: image
+        type: file
       produces:
       - application/json
       responses:
@@ -844,6 +983,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse'
+      security:
+      - BearerAuth: []
       summary: Create or update product
       tags:
       - admin-product
@@ -862,6 +1003,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
       summary: Delete product
       tags:
       - admin-product
@@ -879,30 +1022,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse'
+      security:
+      - BearerAuth: []
       summary: Get product by article
       tags:
       - admin-product
   /admin/product/base-model:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: Delete base model request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/product.DeleteBaseModelRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
-      summary: Delete base model
-      tags:
-      - admin-product
     post:
       consumes:
       - application/json
@@ -920,20 +1045,44 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelResponse'
+      security:
+      - BearerAuth: []
       summary: Create or update base model
       tags:
       - admin-product
-  /admin/product/base-models:
-    post:
-      consumes:
-      - application/json
+  /admin/product/base-model/{baseModelName}/{id}:
+    delete:
       parameters:
-      - description: Get base models request
-        in: body
-        name: request
+      - description: Base model name
+        in: path
+        name: baseModelName
         required: true
-        schema:
-          $ref: '#/definitions/api.GetBaseModelsRequest'
+        type: string
+      - description: Base model ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
+      summary: Delete base model
+      tags:
+      - admin-product
+  /admin/product/base-models/{baseModelName}:
+    get:
+      parameters:
+      - description: Base model name
+        in: path
+        name: baseModelName
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -941,20 +1090,25 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse'
+      security:
+      - BearerAuth: []
       summary: Get all base models
       tags:
       - admin-product
-  /admin/report/average-processing-time:
-    post:
-      consumes:
-      - application/json
+  /admin/report/average-processing-time/{period}:
+    get:
       parameters:
-      - description: Report request
-        in: body
-        name: request
+      - description: Period (today, yesterday, week, month, year)
+        enum:
+        - today
+        - yesterday
+        - week
+        - month
+        - year
+        in: path
+        name: period
         required: true
-        schema:
-          $ref: '#/definitions/report.ReportRequest'
+        type: string
       produces:
       - application/json
       responses:
@@ -962,20 +1116,25 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_AverageOrderProcessingTimeResponse'
+      security:
+      - BearerAuth: []
       summary: Get average order processing time
       tags:
       - admin-report
-  /admin/report/orders-by-time:
-    post:
-      consumes:
-      - application/json
+  /admin/report/orders-by-time/{period}:
+    get:
       parameters:
-      - description: Report request
-        in: body
-        name: request
+      - description: Period (today, yesterday, week, month, year)
+        enum:
+        - today
+        - yesterday
+        - week
+        - month
+        - year
+        in: path
+        name: period
         required: true
-        schema:
-          $ref: '#/definitions/report.ReportRequest'
+        type: string
       produces:
       - application/json
       responses:
@@ -983,20 +1142,25 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_OrdersByTimeOfDayResponse'
+      security:
+      - BearerAuth: []
       summary: Get amount of orders by time of day
       tags:
       - admin-report
-  /admin/report/purchases-by-brands:
-    post:
-      consumes:
-      - application/json
+  /admin/report/purchases-by-brands/{period}:
+    get:
       parameters:
-      - description: Report request
-        in: body
-        name: request
+      - description: Period (today, yesterday, week, month, year)
+        enum:
+        - today
+        - yesterday
+        - week
+        - month
+        - year
+        in: path
+        name: period
         required: true
-        schema:
-          $ref: '#/definitions/report.ReportRequest'
+        type: string
       produces:
       - application/json
       responses:
@@ -1004,6 +1168,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-report_PurchasesByBrandsResponse'
+      security:
+      - BearerAuth: []
       summary: Get purchases by brands
       tags:
       - admin-report
@@ -1076,6 +1242,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
       summary: Delete client
       tags:
       - client
@@ -1088,6 +1256,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse'
+      security:
+      - BearerAuth: []
       summary: Get client orders
       tags:
       - client-order
@@ -1108,6 +1278,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse'
+      security:
+      - BearerAuth: []
       summary: Create order
       tags:
       - client-order
@@ -1126,6 +1298,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse'
+      security:
+      - BearerAuth: []
       summary: Get order by id
       tags:
       - client-order
@@ -1144,7 +1318,29 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
       summary: Cancel order
+      tags:
+      - client-order
+  /client/order/{id}/complete:
+    post:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
+      summary: Complete order
       tags:
       - client-order
   /client/order/add-product:
@@ -1165,28 +1361,9 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-order_ClientOrderResponse'
+      security:
+      - BearerAuth: []
       summary: Add product to order
-      tags:
-      - client-order
-  /client/order/complete:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Complete order request
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
-      summary: Complete order
       tags:
       - client-order
   /client/product:
@@ -1225,6 +1402,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse'
+      security:
+      - BearerAuth: []
       summary: Get products
       tags:
       - client-product
@@ -1243,10 +1422,51 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedProductResponse'
+      security:
+      - BearerAuth: []
       summary: Get product
       tags:
       - client-product
-  /client/product/{id}/favorites:
+  /client/product/{article}/favorites:
+    post:
+      parameters:
+      - description: Product article
+        in: path
+        name: article
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
+      summary: Action product to favorites
+      tags:
+      - client-product
+  /client/product/base-models:
+    get:
+      parameters:
+      - description: Base model name
+        in: query
+        name: baseModelName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all base models
+      tags:
+      - client-product
+  /client/product/favorites:
     get:
       parameters:
       - description: Client ID
@@ -1261,49 +1481,9 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ProductsResponse'
+      security:
+      - BearerAuth: []
       summary: Get favorite products
-      tags:
-      - client-product
-  /client/product/base-models:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Get base models request
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelsResponse'
-      summary: Get all base models
-      tags:
-      - client-product
-  /client/product/favorites:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Product into favorites request
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
-      summary: Action product to favorites
       tags:
       - client-product
   /client/profile:
@@ -1324,6 +1504,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse'
+      security:
+      - BearerAuth: []
       summary: Fill client profile
       tags:
       - client
@@ -1342,6 +1524,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ClientResponse'
+      security:
+      - BearerAuth: []
       summary: Get client profile
       tags:
       - client
@@ -1354,6 +1538,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_OrdersResponse'
+      security:
+      - BearerAuth: []
       summary: Get all orders
       tags:
       - manager
@@ -1372,6 +1558,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-api_ExtendedOrderResponse'
+      security:
+      - BearerAuth: []
       summary: Get order by id
       tags:
       - manager
@@ -1390,6 +1578,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
       summary: Cancel order
       tags:
       - manager
@@ -1411,7 +1601,15 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.Response-string'
+      security:
+      - BearerAuth: []
       summary: Give order
       tags:
       - manager
+securityDefinitions:
+  BearerAuth:
+    description: 'Enter your JWT token in the format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

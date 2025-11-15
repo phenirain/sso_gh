@@ -16,14 +16,11 @@ import (
 	"github.com/phenirain/sso/internal/lib/jwt"
 	"github.com/phenirain/sso/pkg/database"
 	"github.com/phenirain/sso/pkg/logger"
+	"github.com/phenirain/sso/pkg/metrics"
 	"golang.org/x/sync/errgroup"
 )
 
 func Run(cfg *config.Config) error {
-
-	if err := logger.Setup(cfg.Env); err != nil {
-		return fmt.Errorf("failed to setup logger: %w", err)
-	}
 
 	db := database.MustInitDb(cfg.ConnectionString)
 
@@ -44,13 +41,24 @@ func Run(cfg *config.Config) error {
 func startServers(ctx context.Context, g *errgroup.Group, db *sqlx.DB, cfg *config.Config) {
 	jwtLib := jwt.NewJwtLib(time.Minute*60, []byte(cfg.Secret))
 
-	log := slog.Default()
+	log, err := logger.Setup(cfg.Env)
+	if err != nil {
+		panic(err)
+	}
 
-	httpServer, err := application.SetupHTTPServer(cfg, db, jwtLib, log)
+	httpServer, m, err := application.SetupHTTPServer(cfg, db, jwtLib, log)
 	if err != nil {
 		slog.Error("Failed to setup HTTP server", "err", err)
 		return
 	}
+
+	// Start metrics collector
+	collector := metrics.NewCollector(m, db, log)
+	g.Go(func() error {
+		log.Info("Starting metrics collector")
+		collector.Start(ctx, time.Second*30) // Collect metrics every 30 seconds
+		return nil
+	})
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.HTTP.Port),

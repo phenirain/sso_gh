@@ -1,5 +1,5 @@
 env: "dev"
-connection_string: "postgres://phenirain:phenirain13%29@147.45.197.137:5432/FourthCourseFirstProject?sslmode=disable"
+connection_string: "postgres://phenirain:phenirain13%29@postgres:5432/FourthCourseFirstProject?sslmode=disable"
 secret: "fourthcoursefirthproject-secret-key-256-bits-minimum-length-required-for-security"
 api_address: "localhost:8080"
 allowed_origins:

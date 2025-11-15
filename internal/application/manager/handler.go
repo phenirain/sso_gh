@@ -24,6 +24,7 @@ func NewOrderHandler(managerService pb.ManagerServiceClient) *OrderHandler {
 // @Tags manager
 // @Produce json
 // @Success 200 {object} response.Response[api.OrdersResponse]
+// @Security BearerAuth
 // @Router /manager/order [get]
 func (h *OrderHandler) GetAllOrders(c echo.Context) (err error) {
 	var result *api.OrdersResponse
@@ -40,6 +41,7 @@ func (h *OrderHandler) GetAllOrders(c echo.Context) (err error) {
 // @Produce json
 // @Param id path int true "Order ID"
 // @Success 200 {object} response.Response[api.ExtendedOrderResponse]
+// @Security BearerAuth
 // @Router /manager/order/{id} [get]
 func (h *OrderHandler) GetOrderById(c echo.Context) (err error) {
 	id := c.Param("id")
@@ -65,6 +67,7 @@ func (h *OrderHandler) GetOrderById(c echo.Context) (err error) {
 // @Produce json
 // @Param request body pb.PaidOrderRequest true "Paid order request"
 // @Success 200 {object} response.Response[string]
+// @Security BearerAuth
 // @Router /manager/order/give [post]
 func (h *OrderHandler) GiveOrder(c echo.Context) (err error) {
 	var req pb.PaidOrderRequest
@@ -85,6 +88,7 @@ func (h *OrderHandler) GiveOrder(c echo.Context) (err error) {
 // @Produce json
 // @Param id path int true "Order ID"
 // @Success 200 {object} response.Response[string]
+// @Security BearerAuth
 // @Router /manager/order/{id}/cancel [post]
 func (h *OrderHandler) CancelOrder(c echo.Context) (err error) {
 	id := c.Param("id")
