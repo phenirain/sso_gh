@@ -229,6 +229,20 @@ definitions:
         description: Refresh Token для обновления пары токенов
         type: string
     type: object
+  github_com_phenirain_sso_internal_dto_response.ApiResponse-any:
+    properties:
+      data:
+        description: Данные ответа
+      details:
+        description: Детали ошибки
+        type: string
+      message:
+        description: Сообщение (комментарий) об ошибке
+        type: string
+      success:
+        description: Статус ответа
+        type: boolean
+    type: object
   github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelResponse:
     properties:
       data:
@@ -531,6 +545,12 @@ definitions:
       success:
         description: Статус ответа
         type: boolean
+    type: object
+  internal_application_auth.ForgotPasswordRequest:
+    properties:
+      login:
+        example: user@example.com
+        type: string
     type: object
   manager.PaidOrderRequest:
     properties:
@@ -1173,6 +1193,27 @@ paths:
       summary: Get purchases by brands
       tags:
       - admin-report
+  /auth/forgotPassword:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_application_auth.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.ApiResponse-any'
+      summary: Send password reset email
+      tags:
+      - auth
   /auth/logIn:
     post:
       consumes:
@@ -1204,6 +1245,27 @@ paths:
           schema:
             $ref: '#/definitions/github_com_phenirain_sso_internal_dto_auth.AuthResponse'
       summary: Refresh access token
+      tags:
+      - auth
+  /auth/resetPassword:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login and new password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_phenirain_sso_internal_dto_auth.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_phenirain_sso_internal_dto_response.ApiResponse-any'
+      summary: Reset user password
       tags:
       - auth
   /auth/signUp:

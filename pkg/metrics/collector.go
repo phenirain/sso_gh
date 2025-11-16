@@ -53,20 +53,7 @@ func (c *Collector) collectMetrics() {
 		c.metrics.SetTotalUsers(float64(userCount))
 	}
 
-	// Collect audit records count
-	var auditCount int64
-	err = c.db.Get(&auditCount, "SELECT COUNT(*) FROM audit")
-	if err != nil {
-		c.logger.Error("Failed to collect audit count metric", "error", err)
-	} else {
-		c.metrics.SetDatabaseRecords("audit", float64(auditCount))
-	}
-
-	// Set users table count as well
-	c.metrics.SetDatabaseRecords("users", float64(userCount))
-
 	c.logger.Debug("Metrics collected",
 		"users", userCount,
-		"audit_records", auditCount,
 	)
 }

@@ -858,6 +858,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/forgotPassword": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Send password reset email",
+                "parameters": [
+                    {
+                        "description": "User login",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_application_auth.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.ApiResponse-any"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/logIn": {
             "post": {
                 "consumes": [
@@ -905,6 +938,39 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_auth.AuthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/resetPassword": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Reset user password",
+                "parameters": [
+                    {
+                        "description": "Login and new password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_auth.AuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_phenirain_sso_internal_dto_response.ApiResponse-any"
                         }
                     }
                 }
@@ -1920,6 +1986,26 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_phenirain_sso_internal_dto_response.ApiResponse-any": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Данные ответа"
+                },
+                "details": {
+                    "description": "Детали ошибки",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Сообщение (комментарий) об ошибке",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "Статус ответа",
+                    "type": "boolean"
+                }
+            }
+        },
         "github_com_phenirain_sso_internal_dto_response.Response-api_BaseModelResponse": {
             "type": "object",
             "properties": {
@@ -2388,6 +2474,15 @@ const docTemplate = `{
                 "success": {
                     "description": "Статус ответа",
                     "type": "boolean"
+                }
+            }
+        },
+        "internal_application_auth.ForgotPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "example": "user@example.com"
                 }
             }
         },

@@ -17,10 +17,6 @@ func MetricsMiddleware(m *metrics.Metrics) echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			// Increment in-flight requests
-			m.IncrementInFlight()
-			defer m.DecrementInFlight()
-
 			start := time.Now()
 
 			// Process request

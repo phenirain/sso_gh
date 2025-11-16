@@ -12,7 +12,10 @@ allowed_origins:
 http:
   port: 8081
   timeout: 15m
-grpc: 
+grpc:
   admin: "api:8080"
   client: "api:8080"
   manager: "api:8080"
+email:
+  service_url: "http://localhost:3001"
+  frontend_reset_url: "http://localhost:5173/reset-password"

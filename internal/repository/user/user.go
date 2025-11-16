@@ -91,3 +91,30 @@ func (u *UserRepository) CreateUser(ctx context.Context, user *domain.User) (int
 	return result, nil
 }
 
+func (u *UserRepository) UpdatePassword(ctx context.Context, login, newPasswordHash string) error {
+	const op = "User.UpdatePassword"
+	log := slog.With(slog.String("op", op))
+
+	log.Info("attempting to update password for user", "login", login)
+
+	query := `UPDATE users SET password = $1, update_datetime = NOW() WHERE login = $2`
+	result, err := u.db.ExecContext(ctx, query, newPasswordHash, login)
+	if err != nil {
+		log.Error("failed to update password", "err", err)
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Error("failed to get rows affected", "err", err)
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: user not found", op)
+	}
+
+	log.Info("password updated successfully", "login", login)
+	return nil
+}
+

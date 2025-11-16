@@ -1,11 +1,16 @@
 package auth
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 
+	"github.com/phenirain/sso/internal/config"
 	"github.com/phenirain/sso/internal/domain"
 	"github.com/phenirain/sso/internal/dto/auth"
 	authErrors "github.com/phenirain/sso/internal/errors/auth"
@@ -24,19 +29,22 @@ type Repository interface {
 	GetUserByLogin(ctx context.Context, login string) (*domain.User, error)
 	GetUserWithId(ctx context.Context, uid int64) (*domain.User, error)
 	CreateUser(ctx context.Context, user *domain.User) (int64, error)
+	UpdatePassword(ctx context.Context, login, newPasswordHash string) error
 }
 
 type Auth struct {
-	s    pb.ClientServiceClient
-	repo Repository
-	jwt  Jwt
+	s      pb.ClientServiceClient
+	repo   Repository
+	jwt    Jwt
+	config *config.Config
 }
 
-func New(repo Repository, jwt Jwt, clientService pb.ClientServiceClient) *Auth {
+func New(repo Repository, jwt Jwt, clientService pb.ClientServiceClient, cfg *config.Config) *Auth {
 	return &Auth{
-		repo: repo,
-		jwt:  jwt,
-		s:    clientService,
+		repo:   repo,
+		jwt:    jwt,
+		s:      clientService,
+		config: cfg,
 	}
 }
 
@@ -139,4 +147,86 @@ func (a *Auth) getAuthResponse(userId, role int64) (*auth.AuthResponse, error) {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+func (a *Auth) SendPasswordResetEmail(ctx context.Context, login string) error {
+	const op = "Auth.SendPasswordResetEmail"
+
+	// Проверяем существование пользователя
+	user, err := a.repo.GetUserByLogin(ctx, login)
+	if err != nil {
+		slog.Error("failed to get user", "err", err)
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if user == nil {
+		return authErrors.ErrUserNotFound
+	}
+
+	// Email это login пользователя (используется при регистрации)
+	userEmail := login
+
+	// Кодируем логин в base64
+	encodedLogin := base64.StdEncoding.EncodeToString([]byte(login))
+
+	// Формируем ссылку для сброса пароля
+	resetLink := fmt.Sprintf("%s?token=%s", a.config.Email.FrontendResetURL, encodedLogin)
+
+	// Отправляем запрос на email-сервис
+	emailPayload := map[string]interface{}{
+		"to":        userEmail,
+		"resetLink": resetLink,
+		"login":     login,
+	}
+
+	jsonData, err := json.Marshal(emailPayload)
+	if err != nil {
+		return fmt.Errorf("%s: ошибка создания JSON: %w", op, err)
+	}
+
+	resp, err := http.Post(
+		a.config.Email.ServiceURL+"/send-reset-email",
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		slog.Error("failed to send email", "err", err)
+		return fmt.Errorf("%s: ошибка отправки email: %w", op, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("%s: email-сервис вернул статус %d", op, resp.StatusCode)
+	}
+
+	slog.Info("password reset email sent", "login", login, "email", userEmail)
+	return nil
+}
+
+func (a *Auth) ResetPassword(ctx context.Context, login, newPassword string) error {
+	const op = "Auth.ResetPassword"
+
+	// Проверяем существование пользователя
+	user, err := a.repo.GetUserByLogin(ctx, login)
+	if err != nil {
+		slog.Error("failed to get user", "err", err)
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if user == nil {
+		return authErrors.ErrUserNotFound
+	}
+
+	// Хешируем новый пароль используя ту же логику что и при создании
+	newUser := domain.NewUser(login, newPassword, nil, nil)
+
+	// Обновляем пароль (PasswordHash это []byte, нужно string)
+	err = a.repo.UpdatePassword(ctx, login, string(newUser.PasswordHash))
+	if err != nil {
+		slog.Error("failed to update password", "err", err)
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	slog.Info("password reset successful", "login", login)
+	return nil
 }

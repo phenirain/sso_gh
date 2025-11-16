@@ -117,7 +117,7 @@ func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog
 	log.Info("gRPC clients initialized successfully")
 
 	usersRepository := user.New(db)
-	authService := authService.New(usersRepository, jwt, clientClientService)
+	authService := authService.New(usersRepository, jwt, clientClientService, cfg)
 	registerAuthRoutes(e, authService, m)
 	registerAdminRoutes(e, adminClientService, adminProductService, adminOrderService, adminReportService)
 	registerClientRoutes(e, clientClientService, clientProductService, clientOrderService)
@@ -132,6 +132,8 @@ func registerAuthRoutes(e *echo.Echo, authService auth.AuthService, m *metrics.M
 	auth.POST("/logIn", authHandler.LogIn)
 	auth.POST("/signUp", authHandler.SignUp)
 	auth.POST("/refresh", authHandler.Refresh)
+	auth.POST("/forgotPassword", authHandler.ForgotPassword)
+	auth.POST("/resetPassword", authHandler.ResetPassword)
 }
 
 func registerAdminRoutes(

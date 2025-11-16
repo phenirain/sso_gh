@@ -8,13 +8,14 @@ import (
 )
 
 type Config struct {
-	Env              string     `mapstructure:"env"`
-	ConnectionString string     `mapstructure:"connection_string"`
-	AllowedOrigins   []string   `mapstructure:"allowed_origins"`
-	Secret           string     `mapstructure:"secret"`
-	APIAddress       string     `mapstructure:"api_address"`
-	HTTP             HTTPConfig `mapstructure:"http"`
-	GRPC             GRPCConfig `mapstructure:"grpc"`
+	Env              string      `mapstructure:"env"`
+	ConnectionString string      `mapstructure:"connection_string"`
+	AllowedOrigins   []string    `mapstructure:"allowed_origins"`
+	Secret           string      `mapstructure:"secret"`
+	APIAddress       string      `mapstructure:"api_address"`
+	HTTP             HTTPConfig  `mapstructure:"http"`
+	GRPC             GRPCConfig  `mapstructure:"grpc"`
+	Email            EmailConfig `mapstructure:"email"`
 }
 
 type HTTPConfig struct {
@@ -23,9 +24,14 @@ type HTTPConfig struct {
 }
 
 type GRPCConfig struct {
-	Admin string `mapstructure:"admin"`
-	Client string `mapstructure:"client"`
+	Admin   string `mapstructure:"admin"`
+	Client  string `mapstructure:"client"`
 	Manager string `mapstructure:"manager"`
+}
+
+type EmailConfig struct {
+	ServiceURL         string `mapstructure:"service_url"`
+	FrontendResetURL   string `mapstructure:"frontend_reset_url"`
 }
 
 func LoadConfig() (*Config, error) {

@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -91,7 +91,9 @@
           "calcs": ["last", "max", "mean"],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "hideEmpty": true,
+          "hideZero": true
         },
         "tooltip": {
           "mode": "single",
@@ -102,22 +104,22 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(sso_http_requests_total[5m])",
+          "expr": "irate(sso_http_requests_total[30s])",
           "legendFormat": "{{method}} {{path}} - {{status}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "HTTP Request Rate (req/sec)",
+      "title": "HTTP Requests per Second",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -184,7 +186,9 @@
           "calcs": ["last", "max", "mean"],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "hideEmpty": true,
+          "hideZero": true
         },
         "tooltip": {
           "mode": "single",
@@ -195,7 +199,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum(rate(sso_http_request_duration_seconds_bucket[5m])) by (le, method, path))",
@@ -206,7 +210,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.50, sum(rate(sso_http_request_duration_seconds_bucket[5m])) by (le, method, path))",
@@ -222,7 +226,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -239,14 +243,15 @@
               },
               {
                 "color": "yellow",
-                "value": 5
+                "value": 0.5
               },
               {
                 "color": "red",
-                "value": 10
+                "value": 1
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -274,22 +279,22 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sso_http_requests_in_flight",
-          "legendFormat": "In-Flight Requests",
+          "expr": "sum(rate(sso_http_request_duration_seconds_sum[5m])) / sum(rate(sso_http_request_duration_seconds_count[5m]))",
+          "legendFormat": "Avg Response Time",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "HTTP Requests In-Flight",
+      "title": "Average Response Time",
       "type": "gauge"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -333,7 +338,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "sso_total_users",
@@ -348,7 +353,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -370,11 +375,11 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 8
+        "w": 6,
+        "x": 0,
+        "y": 16
       },
-      "id": 5,
+      "id": 6,
       "options": {
         "orientation": "auto",
         "reduceOptions": {
@@ -392,141 +397,81 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sso_active_sessions",
-          "legendFormat": "Active Sessions",
+          "expr": "sum(sso_auth_operations_total{status=\"success\"})",
+          "legendFormat": "Success",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Active User Sessions",
+      "title": "Auth Success Count",
       "type": "gauge"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
               }
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*success.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*failure.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 0,
+        "w": 6,
+        "x": 6,
         "y": 16
       },
-      "id": 6,
+      "id": 8,
       "options": {
-        "legend": {
-          "calcs": ["sum", "last"],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
+      "pluginVersion": "10.0.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(sso_auth_operations_total[5m])",
-          "legendFormat": "{{operation}} - {{status}}",
+          "expr": "sum(sso_auth_operations_total{status=\"failure\"})",
+          "legendFormat": "Failure",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Authentication Operations Rate",
-      "type": "timeseries"
+      "title": "Auth Failure Count",
+      "type": "gauge"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -588,7 +533,9 @@
           "calcs": ["last", "max", "min"],
           "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "hideEmpty": true,
+          "hideZero": true
         },
         "tooltip": {
           "mode": "multi",
@@ -599,16 +546,16 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sso_database_records_total",
-          "legendFormat": "{{table}} table",
+          "expr": "sum(increase(sso_http_requests_total[1m]))",
+          "legendFormat": "Total Requests",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Database Records Count",
+      "title": "Total HTTP Requests",
       "type": "timeseries"
     }
   ],

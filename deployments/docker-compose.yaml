@@ -8,7 +8,6 @@ services:
     networks:
       - deployments_api-network
 
-  # Prometheus для сбора метрик
   prometheus:
     image: prom/prometheus:latest
     container_name: sso-prometheus
@@ -21,13 +20,11 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     networks:
       - deployments_api-network
     restart: unless-stopped
 
-  # Grafana для визуализации метрик
   grafana:
     image: grafana/grafana:latest
     container_name: sso-grafana
@@ -55,3 +52,4 @@ networks:
 volumes:
   prometheus-data:
   grafana-data:
+  alertmanager-data:
