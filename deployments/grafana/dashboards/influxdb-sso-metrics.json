@@ -1,0 +1,242 @@
+{
+  "dashboard": {
+    "title": "SSO InfluxDB Metrics",
+    "tags": ["influxdb", "sso", "metrics"],
+    "timezone": "browser",
+    "editable": true,
+    "panels": [
+      {
+        "id": 1,
+        "title": "HTTP Requests per Second",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"http_request\")\n  |> filter(fn: (r) => r[\"_field\"] == \"count\")\n  |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: false)\n  |> yield(name: \"requests_per_second\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "fillOpacity": 10,
+              "gradientMode": "none"
+            },
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "HTTP Request Duration (p95)",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"http_request\")\n  |> filter(fn: (r) => r[\"_field\"] == \"duration_seconds\")\n  |> aggregateWindow(every: v.windowPeriod, fn: (column, tables=<-) => tables |> quantile(q: 0.95, column: column), createEmpty: false)\n  |> yield(name: \"p95\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Auth Operations by User Role (MEANINGFUL TAG!)",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"auth_operation\")\n  |> filter(fn: (r) => r[\"_field\"] == \"count\")\n  |> filter(fn: (r) => r[\"status\"] == \"success\")\n  |> group(columns: [\"user_role\", \"operation\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: false)\n  |> yield(name: \"auth_by_role\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 20
+            }
+          }
+        },
+        "description": "Authentication operations grouped by user_role tag (admin/manager/client) - demonstrates meaningful tag usage"
+      },
+      {
+        "id": 4,
+        "title": "Total Registered Users",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"users\")\n  |> filter(fn: (r) => r[\"_field\"] == \"total\")\n  |> last()\n  |> yield(name: \"total_users\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 100, "color": "yellow"},
+                {"value": 1000, "color": "red"}
+              ]
+            },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "PostgreSQL Active Connections (Telegraf)",
+        "type": "gauge",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"postgresql\")\n  |> filter(fn: (r) => r[\"_field\"] == \"numbackends\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"active_connections\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "red"}
+              ]
+            },
+            "unit": "short",
+            "max": 100
+          }
+        },
+        "description": "PostgreSQL connections monitored by Telegraf plugin"
+      },
+      {
+        "id": 6,
+        "title": "HTTP Status Code Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"http_request\")\n  |> filter(fn: (r) => r[\"_field\"] == \"count\")\n  |> group(columns: [\"status\"])\n  |> sum()\n  |> group()\n  |> yield(name: \"status_distribution\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "PostgreSQL Database Size (Telegraf)",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"postgresql\")\n  |> filter(fn: (r) => r[\"_field\"] == \"db_size\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"db_size\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "bytes"
+          }
+        },
+        "description": "Database size tracked by Telegraf PostgreSQL plugin"
+      },
+      {
+        "id": 8,
+        "title": "Failed Login Attempts",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"auth_operation\")\n  |> filter(fn: (r) => r[\"_field\"] == \"count\")\n  |> filter(fn: (r) => r[\"status\"] == \"failure\")\n  |> filter(fn: (r) => r[\"operation\"] == \"login\")\n  |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: false)\n  |> yield(name: \"failed_logins\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic", "fixedColor": "red"},
+            "unit": "short"
+          }
+        },
+        "description": "Failed authentication attempts - security monitoring"
+      },
+      {
+        "id": 9,
+        "title": "System CPU Usage (Telegraf)",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cpu\")\n  |> filter(fn: (r) => r[\"_field\"] == \"usage_idle\")\n  |> filter(fn: (r) => r[\"cpu\"] == \"cpu-total\")\n  |> map(fn: (r) => ({ r with _value: 100.0 - r._value }))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"cpu_usage\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "percent",
+            "max": 100,
+            "min": 0
+          }
+        },
+        "description": "CPU usage collected by Telegraf system plugin"
+      },
+      {
+        "id": 10,
+        "title": "Memory Usage (Telegraf)",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "refId": "A",
+            "datasource": {"type": "influxdb", "uid": "P951FEA4DE68E13C5"},
+            "query": "from(bucket: \"sso-metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mem\")\n  |> filter(fn: (r) => r[\"_field\"] == \"used_percent\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"memory_usage\")"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "percent",
+            "max": 100,
+            "min": 0
+          }
+        },
+        "description": "Memory usage collected by Telegraf system plugin"
+      }
+    ],
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "version": 1
+  }
+}

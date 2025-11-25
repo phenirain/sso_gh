@@ -1,5 +1,5 @@
 env: "dev"
-connection_string: "postgres://phenirain:phenirain13%29@postgres:5432/FourthCourseFirstProject?sslmode=disable"
+connection_string: "postgres://phenirain:phenirain13%29@host.docker.internal:5432/FourthCourseFirstProject?sslmode=disable"
 secret: "fourthcoursefirthproject-secret-key-256-bits-minimum-length-required-for-security"
 api_address: "localhost:8080"
 allowed_origins:
@@ -17,5 +17,11 @@ grpc:
   client: "api:8080"
   manager: "api:8080"
 email:
-  service_url: "http://localhost:3001"
+  service_url: "http://email-service:3001"
   frontend_reset_url: "http://localhost:5173/reset-password"
+influxdb:
+  enabled: true
+  url: "http://influxdb:8086"
+  token: "my-super-secret-auth-token"
+  org: "sso-org"
+  bucket: "sso-metrics"

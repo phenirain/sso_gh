@@ -24,6 +24,8 @@ func JwtValidation(jwt Jwt) echo.MiddlewareFunc {
 		"/auth/logIn":   {},
 		"/auth/signUp":  {},
 		"/auth/refresh": {},
+		"/auth/forgotPassword": {},
+		"/auth/resetPassword": {},
 		"/health":       {},
 		"/swagger/*":    {},
 		"/v":            {},

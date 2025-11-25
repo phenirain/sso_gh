@@ -7,6 +7,41 @@ services:
       - "7070:6060"
     networks:
       - deployments_api-network
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: sso-influxdb
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminadmin
+      - DOCKER_INFLUXDB_INIT_ORG=sso-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=sso-metrics
+      - DOCKER_INFLUXDB_INIT_RETENTION=7d
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-auth-token
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    networks:
+      - deployments_api-network
+    restart: unless-stopped
+
+  telegraf:
+    image: telegraf:1.31-alpine
+    container_name: sso-telegraf
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - deployments_api-network
+    depends_on:
+      - influxdb
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
@@ -20,9 +55,12 @@ services:
     ports:
       - "9090:9090"
     volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     networks:
       - deployments_api-network
+    depends_on:
+      - sso
     restart: unless-stopped
 
   grafana:
@@ -38,11 +76,24 @@ services:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
     networks:
       - deployments_api-network
     depends_on:
       - prometheus
+      - influxdb
+    restart: unless-stopped
+
+  email-service:
+    build:
+      context: ../email-service
+      dockerfile: Dockerfile
+    container_name: sso-email-service
+    env_file:
+      - ../email-service/.env
+    ports:
+      - "3001:3001"
+    networks:
+      - deployments_api-network
     restart: unless-stopped
 
 networks:
@@ -52,4 +103,5 @@ networks:
 volumes:
   prometheus-data:
   grafana-data:
-  alertmanager-data:
+  influxdb-data:
+  influxdb-config:

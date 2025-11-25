@@ -36,8 +36,32 @@ import (
 func SetupHTTPServer(cfg *config.Config, db *sqlx.DB, jwt *jwt.JwtLib, log *slog.Logger) (*echo.Echo, *metrics.Metrics, error) {
 	e := echo.New()
 
-	// Initialize metrics
+	// Initialize Prometheus metrics
 	m := metrics.New()
+
+	// Initialize InfluxDB writer if enabled
+	if cfg.InfluxDB.Enabled {
+		influxWriter, err := metrics.NewInfluxDBWriter(metrics.InfluxDBConfig{
+			URL:    cfg.InfluxDB.URL,
+			Token:  cfg.InfluxDB.Token,
+			Org:    cfg.InfluxDB.Org,
+			Bucket: cfg.InfluxDB.Bucket,
+		})
+		if err != nil {
+			log.Error("Failed to initialize InfluxDB writer", slog.String("error", err.Error()))
+			// Continue without InfluxDB - it's optional
+		} else {
+			m.InfluxDB = influxWriter
+			log.Info("InfluxDB metrics writer initialized successfully")
+
+			// Start error handler for InfluxDB writes
+			go func() {
+				for err := range influxWriter.GetErrors() {
+					log.Error("InfluxDB write error", slog.String("error", err.Error()))
+				}
+			}()
+		}
+	}
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Recover())

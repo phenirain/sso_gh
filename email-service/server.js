@@ -25,7 +25,7 @@ app.post('/send-reset-email', async (req, res) => {
     const { data, error } = await resend.emails.send({
       from: process.env.FROM_EMAIL,
       to: to,
-      subject: 'Сброс пароля - SSO System',
+      subject: 'Сброс пароля - Cosmetics Shop',
       html: generateResetEmailHTML(login, resetLink)
     });
 
@@ -67,7 +67,7 @@ function generateResetEmailHTML(login, resetLink) {
             PASSWORD RESET
           </div>
           <div style="margin-top: 10px; font-size: 14px; letter-spacing: 2px;">
-            SSO SYSTEM
+            COSMETICS SHOP
           </div>
         </div>
 
@@ -112,7 +112,7 @@ function generateResetEmailHTML(login, resetLink) {
 
         <!-- Footer -->
         <div style="background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; border-top: 1px solid #000;">
-          SSO Authentication System
+          Cosmetics Shop - Your Beauty Destination
         </div>
 
       </div>

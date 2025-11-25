@@ -67,13 +67,13 @@ func (h *Handler) Refresh(c echo.Context) error {
 	// Получаем токен из заголовка Authorization
 	authHeader := c.Request().Header.Get("Authorization")
 	if authHeader == "" {
-		h.m.RecordAuthOperation("refresh", "failure")
+		h.m.RecordAuthOperation("refresh", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Отсутствует токен", "Заголовок Authorization обязателен"))
 	}
 
 	// Проверяем формат "Bearer <token>"
 	if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-		h.m.RecordAuthOperation("refresh", "failure")
+		h.m.RecordAuthOperation("refresh", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Неверный формат токена", "Используйте формат: Bearer <token>"))
 	}
 
@@ -81,11 +81,12 @@ func (h *Handler) Refresh(c echo.Context) error {
 
 	result, err := h.s.Refresh(ctx, refreshToken)
 	if err != nil {
-		h.m.RecordAuthOperation("refresh", "failure")
+		h.m.RecordAuthOperation("refresh", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка обновления токена", err.Error()))
 	}
 
-	h.m.RecordAuthOperation("refresh", "success")
+	// TODO: Extract user role from JWT token for more accurate metrics
+	h.m.RecordAuthOperation("refresh", "success", "client")
 	return c.JSON(http.StatusOK, response.NewSuccessResponse(result))
 }
 
@@ -108,22 +109,22 @@ func (h *Handler) ForgotPassword(c echo.Context) error {
 	var req ForgotPasswordRequest
 
 	if err := c.Bind(&req); err != nil {
-		h.m.RecordAuthOperation("forgot_password", "failure")
+		h.m.RecordAuthOperation("forgot_password", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
 	}
 
 	if req.Login == "" {
-		h.m.RecordAuthOperation("forgot_password", "failure")
+		h.m.RecordAuthOperation("forgot_password", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Отсутствует аргумент", "Логин обязателен"))
 	}
 
 	err := h.s.SendPasswordResetEmail(ctx, req.Login)
 	if err != nil {
-		h.m.RecordAuthOperation("forgot_password", "failure")
+		h.m.RecordAuthOperation("forgot_password", "failure", "client")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка отправки письма", err.Error()))
 	}
 
-	h.m.RecordAuthOperation("forgot_password", "success")
+	h.m.RecordAuthOperation("forgot_password", "success", "client")
 	return c.JSON(http.StatusOK, response.NewSuccessResponseEmpty("Письмо для сброса пароля отправлено на почту"))
 }
 
@@ -140,16 +141,16 @@ func (h *Handler) ResetPassword(c echo.Context) error {
 
 	var req authModels.AuthRequest
 	if err := c.Bind(&req); err != nil {
-		h.m.RecordAuthOperation("password_reset", "failure")
+		h.m.RecordAuthOperation("password_reset", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
 	}
 
 	if req.Login == "" {
-		h.m.RecordAuthOperation("password_reset", "failure")
+		h.m.RecordAuthOperation("password_reset", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Отсутствует аргумент", "Логин обязателен"))
 	}
 	if req.Password == "" {
-		h.m.RecordAuthOperation("password_reset", "failure")
+		h.m.RecordAuthOperation("password_reset", "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Отсутствует аргумент", "Новый пароль обязателен"))
 	}
 
@@ -161,11 +162,11 @@ func (h *Handler) ResetPassword(c echo.Context) error {
 
 	err := h.s.ResetPassword(ctx, decodedLogin, req.Password)
 	if err != nil {
-		h.m.RecordAuthOperation("password_reset", "failure")
+		h.m.RecordAuthOperation("password_reset", "failure", "client")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка сброса пароля", err.Error()))
 	}
 
-	h.m.RecordAuthOperation("password_reset", "success")
+	h.m.RecordAuthOperation("password_reset", "success", "client")
 	return c.JSON(http.StatusOK, response.NewSuccessResponseEmpty(fmt.Sprintf("Пароль для пользователя %s успешно изменен", decodedLogin)))
 }
 
@@ -179,25 +180,26 @@ func (h *Handler) auth(c echo.Context, isNew bool) error {
 
 	var req authModels.AuthRequest
 	if err := c.Bind(&req); err != nil {
-		h.m.RecordAuthOperation(operation, "failure")
+		h.m.RecordAuthOperation(operation, "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения json", err.Error()))
 	}
 
 	if req.Login == "" {
-		h.m.RecordAuthOperation(operation, "failure")
+		h.m.RecordAuthOperation(operation, "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Отсутствует аргумент", "Логин обязателен"))
 	}
 	if req.Password == "" {
-		h.m.RecordAuthOperation(operation, "failure")
+		h.m.RecordAuthOperation(operation, "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Отсутствует аргумент", "Пароль обязателен"))
 	}
 
 	result, err := h.s.Auth(ctx, req, isNew)
 	if err != nil {
-		h.m.RecordAuthOperation(operation, "failure")
+		h.m.RecordAuthOperation(operation, "failure", "client")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка авторизации", err.Error()))
 	}
 
-	h.m.RecordAuthOperation(operation, "success")
+	// Successfully authenticated as client (default role for new registrations)
+	h.m.RecordAuthOperation(operation, "success", "client")
 	return c.JSON(http.StatusOK, response.NewSuccessResponse(result))
 }

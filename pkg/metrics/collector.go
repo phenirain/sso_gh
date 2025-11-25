@@ -44,14 +44,15 @@ func (c *Collector) Start(ctx context.Context, interval time.Duration) {
 }
 
 func (c *Collector) collectMetrics() {
-	// Collect total users count
+	// Collect total users count from SSO database
 	var userCount int64
 	err := c.db.Get(&userCount, "SELECT COUNT(*) FROM users")
 	if err != nil {
 		c.logger.Error("Failed to collect user count metric", "error", err)
-	} else {
-		c.metrics.SetTotalUsers(float64(userCount))
+		userCount = 0
 	}
+
+	c.metrics.SetTotalUsers(float64(userCount))
 
 	c.logger.Debug("Metrics collected",
 		"users", userCount,

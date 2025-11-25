@@ -89,6 +89,10 @@ func (a *Auth) Auth(ctx context.Context, request auth.AuthRequest, isNew bool) (
 		if user == nil {
 			return nil, authErrors.ErrInvalidUserCredentials
 		}
+		// проверяем, не архивирован ли пользователь
+		if user.IsArchived {
+			return nil, authErrors.ErrUserArchived
+		}
 		valid := user.CheckPassword(request.Password)
 		// если пароль не верен
 		if !valid {
@@ -163,6 +167,11 @@ func (a *Auth) SendPasswordResetEmail(ctx context.Context, login string) error {
 		return authErrors.ErrUserNotFound
 	}
 
+	// Проверяем, не архивирован ли пользователь
+	if user.IsArchived {
+		return authErrors.ErrUserArchived
+	}
+
 	// Email это login пользователя (используется при регистрации)
 	userEmail := login
 
@@ -215,6 +224,11 @@ func (a *Auth) ResetPassword(ctx context.Context, login, newPassword string) err
 
 	if user == nil {
 		return authErrors.ErrUserNotFound
+	}
+
+	// Проверяем, не архивирован ли пользователь
+	if user.IsArchived {
+		return authErrors.ErrUserArchived
 	}
 
 	// Хешируем новый пароль используя ту же логику что и при создании

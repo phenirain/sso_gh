@@ -7,17 +7,20 @@ import (
 
 // Metrics holds all application metrics
 type Metrics struct {
-	// Standard HTTP metrics
+	// Standard HTTP metrics (Prometheus)
 	HTTPRequestsTotal   *prometheus.CounterVec
 	HTTPRequestDuration *prometheus.HistogramVec
 	HTTPRequestsInFlight prometheus.Gauge
 
-	// Custom business metrics
+	// Custom business metrics (Prometheus)
 	// 1. Total number of registered users in the system
 	TotalUsersGauge prometheus.Gauge
 
 	// 2. Authentication operations counter
 	AuthOperationsTotal *prometheus.CounterVec
+
+	// InfluxDB writer (optional, can be nil if not configured)
+	InfluxDB *InfluxDBWriter
 }
 
 func New() *Metrics {
@@ -57,19 +60,44 @@ func New() *Metrics {
 	return m
 }
 
-// RecordHTTPRequest records HTTP request metrics
+// RecordHTTPRequest records HTTP request metrics to both Prometheus and InfluxDB
 func (m *Metrics) RecordHTTPRequest(method, path, status string, duration float64) {
+	// Prometheus metrics
 	m.HTTPRequestsTotal.WithLabelValues(method, path, status).Inc()
 	m.HTTPRequestDuration.WithLabelValues(method, path).Observe(duration)
+
+	// InfluxDB metrics (if configured)
+	if m.InfluxDB != nil {
+		m.InfluxDB.WriteHTTPRequest(method, path, status, duration, "dev")
+	}
 }
 
 // RecordAuthOperation records authentication operation
-func (m *Metrics) RecordAuthOperation(operation, status string) {
+// userRole is a meaningful tag: admin, manager, or client
+func (m *Metrics) RecordAuthOperation(operation, status, userRole string) {
+	// Prometheus metrics
 	m.AuthOperationsTotal.WithLabelValues(operation, status).Inc()
+
+	// InfluxDB metrics with user_role tag (if configured)
+	if m.InfluxDB != nil {
+		m.InfluxDB.WriteAuthOperation(operation, status, userRole, "dev", 0)
+	}
 }
 
 // SetTotalUsers sets the total users gauge
 func (m *Metrics) SetTotalUsers(count float64) {
 	m.TotalUsersGauge.Set(count)
+
+	// InfluxDB metrics (if configured)
+	if m.InfluxDB != nil {
+		m.InfluxDB.WriteTotalUsers(int(count), 0, 0, "dev", "local")
+	}
+}
+
+// Close closes all metric writers
+func (m *Metrics) Close() {
+	if m.InfluxDB != nil {
+		m.InfluxDB.Close()
+	}
 }
 
