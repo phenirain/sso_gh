@@ -10,7 +10,6 @@ import (
 	"github.com/influxdata/influxdb-client-go/v2/api/write"
 )
 
-// InfluxDBWriter handles writing metrics to InfluxDB
 type InfluxDBWriter struct {
 	client   influxdb2.Client
 	writeAPI api.WriteAPI
@@ -18,7 +17,6 @@ type InfluxDBWriter struct {
 	bucket   string
 }
 
-// InfluxDBConfig holds InfluxDB connection configuration
 type InfluxDBConfig struct {
 	URL    string
 	Token  string
@@ -26,11 +24,9 @@ type InfluxDBConfig struct {
 	Bucket string
 }
 
-// NewInfluxDBWriter creates a new InfluxDB writer
 func NewInfluxDBWriter(cfg InfluxDBConfig) (*InfluxDBWriter, error) {
 	client := influxdb2.NewClient(cfg.URL, cfg.Token)
 
-	// Test connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -53,9 +49,6 @@ func NewInfluxDBWriter(cfg InfluxDBConfig) (*InfluxDBWriter, error) {
 	}, nil
 }
 
-// WriteHTTPRequest writes HTTP request metrics to InfluxDB
-// Tags: method, path, status, service, environment
-// Fields: duration_seconds, response_size_bytes
 func (w *InfluxDBWriter) WriteHTTPRequest(method, path, status string, duration float64, environment string) {
 	p := influxdb2.NewPoint(
 		"http_request",
@@ -75,9 +68,6 @@ func (w *InfluxDBWriter) WriteHTTPRequest(method, path, status string, duration 
 	w.writeAPI.WritePoint(p)
 }
 
-// WriteAuthOperation writes authentication operation metrics
-// Tags: operation, status, user_role (meaningful tag!), environment
-// Fields: count, duration_ms
 func (w *InfluxDBWriter) WriteAuthOperation(operation, status, userRole, environment string, durationMs float64) {
 	p := influxdb2.NewPoint(
 		"auth_operation",
@@ -97,16 +87,14 @@ func (w *InfluxDBWriter) WriteAuthOperation(operation, status, userRole, environ
 	w.writeAPI.WritePoint(p)
 }
 
-// WriteTotalUsers writes total users gauge metric
-// Tags: environment, region
-// Fields: total, active_last_24h, new_today
+
 func (w *InfluxDBWriter) WriteTotalUsers(total int, activeCount int, newToday int, environment, region string) {
 	p := influxdb2.NewPoint(
 		"users",
 		map[string]string{
 			"service":     "sso-api",
 			"environment": environment,
-			"region":      region, // Can be useful for multi-region deployments
+			"region":      region, 
 		},
 		map[string]interface{}{
 			"total":           total,
@@ -118,9 +106,6 @@ func (w *InfluxDBWriter) WriteTotalUsers(total int, activeCount int, newToday in
 	w.writeAPI.WritePoint(p)
 }
 
-// WritePasswordResetRequest writes password reset request metrics
-// Tags: status, trigger_source, environment
-// Fields: count, email_send_duration_ms
 func (w *InfluxDBWriter) WritePasswordResetRequest(status, triggerSource, environment string, emailDuration float64) {
 	p := influxdb2.NewPoint(
 		"password_reset",
@@ -139,9 +124,7 @@ func (w *InfluxDBWriter) WritePasswordResetRequest(status, triggerSource, enviro
 	w.writeAPI.WritePoint(p)
 }
 
-// WriteTokenMetrics writes JWT token-related metrics
-// Tags: operation, status, environment
-// Fields: count, validation_duration_ms
+
 func (w *InfluxDBWriter) WriteTokenMetrics(operation, status, environment string, validationDuration float64) {
 	p := influxdb2.NewPoint(
 		"jwt_token",
@@ -160,9 +143,7 @@ func (w *InfluxDBWriter) WriteTokenMetrics(operation, status, environment string
 	w.writeAPI.WritePoint(p)
 }
 
-// WriteActiveSessions writes active session gauge
-// Tags: user_role, environment
-// Fields: count
+
 func (w *InfluxDBWriter) WriteActiveSessions(userRole, environment string, count int) {
 	p := influxdb2.NewPoint(
 		"active_sessions",
@@ -179,9 +160,7 @@ func (w *InfluxDBWriter) WriteActiveSessions(userRole, environment string, count
 	w.writeAPI.WritePoint(p)
 }
 
-// WriteDBQueryMetrics writes database query metrics
-// Tags: query_type, table, environment
-// Fields: duration_ms, rows_affected
+
 func (w *InfluxDBWriter) WriteDBQueryMetrics(queryType, table, environment string, duration float64, rowsAffected int64) {
 	p := influxdb2.NewPoint(
 		"db_query",
@@ -200,9 +179,7 @@ func (w *InfluxDBWriter) WriteDBQueryMetrics(queryType, table, environment strin
 	w.writeAPI.WritePoint(p)
 }
 
-// WriteSuspiciousActivity writes security-related metrics
-// Tags: reason, severity, environment
-// Fields: count, client_ip_hash
+
 func (w *InfluxDBWriter) WriteSuspiciousActivity(reason, severity, environment string, clientIPHash string) {
 	p := influxdb2.NewPoint(
 		"suspicious_activity",
@@ -221,9 +198,7 @@ func (w *InfluxDBWriter) WriteSuspiciousActivity(reason, severity, environment s
 	w.writeAPI.WritePoint(p)
 }
 
-// WriteCustomMetric writes a generic custom metric point
 func (w *InfluxDBWriter) WriteCustomMetric(measurement string, tags map[string]string, fields map[string]interface{}) {
-	// Always add service tag
 	if tags == nil {
 		tags = make(map[string]string)
 	}
@@ -233,18 +208,15 @@ func (w *InfluxDBWriter) WriteCustomMetric(measurement string, tags map[string]s
 	w.writeAPI.WritePoint(p)
 }
 
-// Flush forces all pending writes to be sent
 func (w *InfluxDBWriter) Flush() {
 	w.writeAPI.Flush()
 }
 
-// Close closes the InfluxDB client
 func (w *InfluxDBWriter) Close() {
 	w.writeAPI.Flush()
 	w.client.Close()
 }
 
-// GetErrors returns a channel for write errors
 func (w *InfluxDBWriter) GetErrors() <-chan error {
 	return w.writeAPI.Errors()
 }

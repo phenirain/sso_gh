@@ -5,7 +5,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// Metrics holds all application metrics
 type Metrics struct {
 	// Standard HTTP metrics (Prometheus)
 	HTTPRequestsTotal   *prometheus.CounterVec
@@ -19,7 +18,6 @@ type Metrics struct {
 	// 2. Authentication operations counter
 	AuthOperationsTotal *prometheus.CounterVec
 
-	// InfluxDB writer (optional, can be nil if not configured)
 	InfluxDB *InfluxDBWriter
 }
 

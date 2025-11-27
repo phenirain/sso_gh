@@ -150,6 +150,7 @@ func (a *Auth) getAuthResponse(userId, role int64) (*auth.AuthResponse, error) {
 	return &auth.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		RoleId:       role,
 	}, nil
 }
 

@@ -16,5 +16,6 @@ type AuthResponse struct {
 	RefreshToken string `json:"refresh_token"`
 	// Access Token для доступа к защищенным ресурсам
 	AccessToken string `json:"access_token"`
-	
+	// Role ID пользователя (1=client, 2=manager, 3=admin)
+	RoleId int64 `json:"role_id"`
 }

@@ -31,6 +31,21 @@ func NewHandler(auth AuthService, m *metrics.Metrics) *Handler {
 	}
 }
 
+// roleIDToName converts role ID to role name for metrics
+// 1 = client (buyer), 2 = manager, 3 = admin
+func roleIDToName(roleID int64) string {
+	switch roleID {
+	case 1:
+		return "client"
+	case 2:
+		return "manager"
+	case 3:
+		return "admin"
+	default:
+		return "unknown"
+	}
+}
+
 // LogIn godoc
 // @Summary Login user
 // @Tags auth
@@ -85,8 +100,9 @@ func (h *Handler) Refresh(c echo.Context) error {
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка обновления токена", err.Error()))
 	}
 
-	// TODO: Extract user role from JWT token for more accurate metrics
-	h.m.RecordAuthOperation("refresh", "success", "client")
+	// Use actual role from response
+	roleName := roleIDToName(result.RoleId)
+	h.m.RecordAuthOperation("refresh", "success", roleName)
 	return c.JSON(http.StatusOK, response.NewSuccessResponse(result))
 }
 
@@ -195,11 +211,13 @@ func (h *Handler) auth(c echo.Context, isNew bool) error {
 
 	result, err := h.s.Auth(ctx, req, isNew)
 	if err != nil {
-		h.m.RecordAuthOperation(operation, "failure", "client")
+		// On error, we don't know the role yet, so use "unknown"
+		h.m.RecordAuthOperation(operation, "failure", "unknown")
 		return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка авторизации", err.Error()))
 	}
 
-	// Successfully authenticated as client (default role for new registrations)
-	h.m.RecordAuthOperation(operation, "success", "client")
+	// Successfully authenticated - use actual role from response
+	roleName := roleIDToName(result.RoleId)
+	h.m.RecordAuthOperation(operation, "success", roleName)
 	return c.JSON(http.StatusOK, response.NewSuccessResponse(result))
 }
