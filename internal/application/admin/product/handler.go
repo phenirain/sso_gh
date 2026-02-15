@@ -195,14 +195,16 @@ func (h *ProductHandler) CreateOrUpdateProduct(c echo.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка открытия файла изображения", err.Error()))
 		}
-		defer src.Close()
+		defer func() {
+			_ = src.Close()
+		}()
 
 		// Читаем содержимое файла в байты
 		imageBytes, err := io.ReadAll(src)
 		if err != nil {
 			return c.JSON(http.StatusOK, response.NewBadResponse[any]("Ошибка чтения файла изображения", err.Error()))
 		}
-		
+
 		if len(imageBytes) > 0 {
 			req.Image = imageBytes
 		}

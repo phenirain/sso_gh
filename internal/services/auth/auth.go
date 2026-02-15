@@ -203,7 +203,9 @@ func (a *Auth) SendPasswordResetEmail(ctx context.Context, login string) error {
 		slog.Error("failed to send email", "err", err)
 		return fmt.Errorf("%s: ошибка отправки email: %w", op, err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("%s: email-сервис вернул статус %d", op, resp.StatusCode)

@@ -13,7 +13,7 @@ import (
 )
 
 type UserRepository struct {
-	db  *sqlx.DB
+	db *sqlx.DB
 }
 
 func New(db *sqlx.DB) *UserRepository {
@@ -71,7 +71,9 @@ func (u *UserRepository) CreateUser(ctx context.Context, user *domain.User) (int
 		if err != nil {
 			return 0, err
 		}
-		defer rows.Close()
+		defer func() {
+			_ = rows.Close()
+		}()
 
 		var id int64
 		if rows.Next() {
@@ -117,4 +119,3 @@ func (u *UserRepository) UpdatePassword(ctx context.Context, login, newPasswordH
 	log.Info("password updated successfully", "login", login)
 	return nil
 }
-

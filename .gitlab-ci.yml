@@ -9,7 +9,6 @@ variables:
   GO_VERSION: "1.25"
   GOMODCACHE: "$CI_PROJECT_DIR/.cache/go/pkg/mod"
   GOCACHE: "$CI_PROJECT_DIR/.cache/go/build"
-  GOPRIVATE: "gitlab.com/mpt4164636/fourthcoursefirstprojectgroup/*"
 
 
 .default_go_job: &default_go_job

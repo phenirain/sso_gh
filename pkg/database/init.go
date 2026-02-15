@@ -9,7 +9,6 @@ import (
 	"github.com/phenirain/sso/pkg/contextkeys"
 )
 
-
 func MustInitDb(cs string) *sqlx.DB {
 	db, err := sqlx.Connect("postgres", cs)
 	if err != nil {
@@ -37,14 +36,13 @@ func WithUserTransaction[T any](db *sqlx.DB, ctx context.Context, f func(tx *sql
 
 	_, err = tx.ExecContext(ctx, fmt.Sprintf("SET LOCAL myapp.current_user_id = %d", userID))
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return zero, err
 	}
 
-
 	result, err := f(tx)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return zero, err
 	}
 
@@ -54,6 +52,3 @@ func WithUserTransaction[T any](db *sqlx.DB, ctx context.Context, f func(tx *sql
 
 	return result, nil
 }
-
-
-

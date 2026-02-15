@@ -35,7 +35,9 @@ func NewClients(apiAddress string) (*Clients, error) {
 		grpc.WithUnaryInterceptor(UserIDInterceptor()),
 	)
 	if err != nil {
-		adminConn.Close()
+		if closeErr := adminConn.Close(); closeErr != nil {
+			slog.Error("failed to close admin connection", "error", closeErr)
+		}
 		return nil, fmt.Errorf("failed to connect to client service: %w", err)
 	}
 
@@ -44,8 +46,12 @@ func NewClients(apiAddress string) (*Clients, error) {
 		grpc.WithUnaryInterceptor(UserIDInterceptor()),
 	)
 	if err != nil {
-		adminConn.Close()
-		clientConn.Close()
+		if closeErr := adminConn.Close(); closeErr != nil {
+			slog.Error("failed to close admin connection", "error", closeErr)
+		}
+		if closeErr := clientConn.Close(); closeErr != nil {
+			slog.Error("failed to close client connection", "error", closeErr)
+		}
 		return nil, fmt.Errorf("failed to connect to manager service: %w", err)
 	}
 

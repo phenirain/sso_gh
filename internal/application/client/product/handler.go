@@ -162,7 +162,7 @@ func (h *ProductHandler) ActionProductToFavorites(c echo.Context) error {
 // @Security BearerAuth
 // @Router /client/product/favorites [get]
 func (h *ProductHandler) GetFavoriteProducts(c echo.Context) error {
-	var req api.ActionByIdRequest = api.ActionByIdRequest{
+	req := api.ActionByIdRequest{
 		Id: 0,
 	}
 	result, err := h.s.GetFavoriteProducts(c.Request().Context(), &req)
