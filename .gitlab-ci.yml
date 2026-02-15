@@ -92,5 +92,7 @@ functional:swagger-consistency:
     - |
       if [ -s ci-artifacts/swagger.diff ]; then
         echo "Swagger docs are outdated. Run 'make swagger_gen' and commit docs/* files." | tee -a ci-artifacts/swagger-generate.log
+        echo "Diff:" | tee -a ci-artifacts/swagger-generate.log
+        cat ci-artifacts/swagger.diff | tee -a ci-artifacts/swagger-generate.log
         exit 1
       fi
