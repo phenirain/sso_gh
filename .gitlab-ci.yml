@@ -54,6 +54,8 @@ test:go:
     - go test ./... -count=1 2>&1 | tee ci-artifacts/go-test.log
 
 lint:golangci:
+  tags:
+    - asd
   stage: quality
   image: golangci/golangci-lint:v1.64.8-alpine
   before_script:
