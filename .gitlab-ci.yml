@@ -84,7 +84,10 @@ functional:swagger-consistency:
   script:
     - go install github.com/swaggo/swag/cmd/swag@v1.8.12
     - swag init -g cmd/sso/main.go -o docs --parseDependency --parseInternal 2>&1 | tee ci-artifacts/swagger-generate.log
-    - awk '!/LeftDelim:[[:space:]]*\"\\{\\{\"/ && !/RightDelim:[[:space:]]*\"\\}\\}\"/' docs/docs.go > docs/docs.go.tmp && mv docs/docs.go.tmp docs/docs.go
+    - |
+      grep -vF 'LeftDelim: "{{"' docs/docs.go | \
+      grep -vF 'RightDelim: "}}"' > docs/docs.go.tmp && \
+      mv docs/docs.go.tmp docs/docs.go
     - git diff -- docs/docs.go docs/swagger.yaml docs/swagger.json > ci-artifacts/swagger.diff || true
     - |
       if [ -s ci-artifacts/swagger.diff ]; then
