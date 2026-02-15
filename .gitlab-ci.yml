@@ -58,7 +58,7 @@ lint:golangci:
   stage: quality
   image: golangci/golangci-lint:v2.5.0-alpine
   script:
-    - golangci-lint run --timeout=5m --out-format=tab 2>&1 | tee ci-artifacts/golangci-lint.log
+    - golangci-lint run --timeout=5m --output.tab.path=stdout 2>&1 | tee ci-artifacts/golangci-lint.log
 
 functional:run-sso:
   stage: functional_run
