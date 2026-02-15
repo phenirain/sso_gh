@@ -20,7 +20,7 @@ func UserIDInterceptor() grpc.UnaryClientInterceptor {
 		}
 
 		// Конвертируем int64 в строку для передачи в метаданных
-		md := metadata.Pairs(contextkeys.UserIDCtxKey, fmt.Sprintf("%d", userID))
+		md := metadata.Pairs(string(contextkeys.UserIDCtxKey), fmt.Sprintf("%d", userID))
 		ctx = metadata.NewOutgoingContext(ctx, md)
 
 		return invoker(ctx, method, req, reply, cc, opts...)
