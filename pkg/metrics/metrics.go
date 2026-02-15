@@ -6,16 +6,12 @@ import (
 )
 
 type Metrics struct {
-	// Standard HTTP metrics (Prometheus)
 	HTTPRequestsTotal   *prometheus.CounterVec
 	HTTPRequestDuration *prometheus.HistogramVec
 	HTTPRequestsInFlight prometheus.Gauge
 
-	// Custom business metrics (Prometheus)
-	// 1. Total number of registered users in the system
 	TotalUsersGauge prometheus.Gauge
 
-	// 2. Authentication operations counter
 	AuthOperationsTotal *prometheus.CounterVec
 
 	InfluxDB *InfluxDBWriter

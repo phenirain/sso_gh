@@ -21,6 +21,7 @@ docker_compose_logs:
 
 swagger_gen:
 	swag init -g cmd/sso/main.go -o docs --parseDependency --parseInternal
+	awk '!/LeftDelim:[[:space:]]*\"\\{\\{\"/ && !/RightDelim:[[:space:]]*\"\\}\\}\"/' docs/docs.go > docs/docs.go.tmp && mv docs/docs.go.tmp docs/docs.go
 
 restart_with_config:
 	docker cp config/config.yaml sso:/app/config/config.yaml

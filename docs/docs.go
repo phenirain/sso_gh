@@ -1983,6 +1983,10 @@ const docTemplate = `{
                 "refresh_token": {
                     "description": "Refresh Token для обновления пары токенов",
                     "type": "string"
+                },
+                "role_id": {
+                    "description": "Role ID пользователя (1=client, 2=manager, 3=admin)",
+                    "type": "integer"
                 }
             }
         },
