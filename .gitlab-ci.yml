@@ -11,6 +11,7 @@ variables:
   GOCACHE: "$CI_PROJECT_DIR/.cache/go/build"
 
 
+
 .default_go_job: &default_go_job
   tags:
     - asd
