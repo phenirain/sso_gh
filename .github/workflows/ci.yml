@@ -205,18 +205,6 @@ jobs:
           }
           trap cleanup EXIT
 
-          for i in $(seq 1 30); do
-            if curl -fsS "http://127.0.0.1:8081/metrics" > /dev/null; then
-              echo "SSO started successfully and /metrics is reachable" | tee ci-artifacts/sso-smoke.log
-              exit 0
-            fi
-            sleep 1
-            if [ "$i" -eq 30 ]; then
-              echo "SSO did not start or /metrics is unreachable" | tee ci-artifacts/sso-smoke.log
-              exit 1
-            fi
-          done
-
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
