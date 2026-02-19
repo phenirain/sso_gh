@@ -1,0 +1,226 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  GO_VERSION: "1.25.x"
+
+jobs:
+  lint:
+    name: Lint (golangci-lint)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Prepare artifacts dir
+        run: mkdir -p ci-artifacts
+
+      - name: Go env
+        run: go env
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run golangci-lint
+        run: |
+          docker run --rm \
+            -v "$PWD":/app \
+            -w /app \
+            golangci/golangci-lint:v2.5.0-alpine \
+            golangci-lint run --timeout=5m --output.tab.path=stdout \
+            2>&1 | tee ci-artifacts/golangci-lint.log
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-artifacts
+          path: ci-artifacts/
+          retention-days: 7
+
+  build:
+    name: Build sso binary
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Prepare dirs
+        run: mkdir -p ci-artifacts dist
+
+      - name: Go env
+        run: go env
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build
+        run: |
+          go build -o dist/sso ./cmd/sso 2>&1 | tee ci-artifacts/build.log
+          sha256sum dist/sso > ci-artifacts/sso.sha256
+          cp dist/sso ci-artifacts/sso-binary
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: ci-artifacts/
+          retention-days: 7
+
+  test:
+    name: Go tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Prepare artifacts dir
+        run: mkdir -p ci-artifacts
+
+      - name: Go env
+        run: go env
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./... -count=1 2>&1 | tee ci-artifacts/go-test.log
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: ci-artifacts/
+          retention-days: 7
+
+  functional_swagger_consistency:
+    name: Functional docs (swagger consistency)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Prepare artifacts dir
+        run: mkdir -p ci-artifacts
+
+      - name: Go env
+        run: go env
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Check swagger consistency
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@v1.8.12
+          swag init -g cmd/sso/main.go -o docs --parseDependency --parseInternal 2>&1 | tee ci-artifacts/swagger-generate.log
+
+          grep -vF 'LeftDelim: "{{"' docs/docs.go | \
+            grep -vF 'RightDelim: "}}"' > docs/docs.go.tmp && \
+            mv docs/docs.go.tmp docs/docs.go
+
+          git diff -- docs/docs.go docs/swagger.yaml docs/swagger.json > ci-artifacts/swagger.diff || true
+
+          if [ -s ci-artifacts/swagger.diff ]; then
+            echo "Swagger docs are outdated. Run 'make swagger_gen' and commit docs/* files." | tee -a ci-artifacts/swagger-generate.log
+            echo "Diff:" | tee -a ci-artifacts/swagger-generate.log
+            cat ci-artifacts/swagger.diff | tee -a ci-artifacts/swagger-generate.log
+            exit 1
+          fi
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional-docs-artifacts
+          path: ci-artifacts/
+          retention-days: 7
+
+  functional_run_sso:
+    name: Functional run (sso smoke)
+    runs-on: ubuntu-latest
+    needs: functional_swagger_consistency
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Prepare dirs
+        run: mkdir -p ci-artifacts dist
+
+      - name: Go env
+        run: go env
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run smoke test
+        run: |
+          set -euo pipefail
+          cp config/config.yaml ci-artifacts/config.base.yaml
+          go build -o dist/sso ./cmd/sso
+
+          ./dist/sso > ci-artifacts/sso-run.log 2>&1 &
+          SSO_PID=$!
+
+          cleanup() {
+            kill "$SSO_PID" 2>/dev/null || true
+            wait "$SSO_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          for i in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:8081/metrics" > /dev/null; then
+              echo "SSO started successfully and /metrics is reachable" | tee ci-artifacts/sso-smoke.log
+              exit 0
+            fi
+            sleep 1
+            if [ "$i" -eq 30 ]; then
+              echo "SSO did not start or /metrics is unreachable" | tee ci-artifacts/sso-smoke.log
+              exit 1
+            fi
+          done
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional-run-artifacts
+          path: ci-artifacts/
+          retention-days: 7
